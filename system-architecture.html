@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code — System Architecture</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --bg: #0a0a0f;
+  --surface: #12121a;
+  --surface2: #1a1a26;
+  --border: #2a2a3a;
+  --text: #e4e4ef;
+  --text2: #8888a0;
+  --accent: #ff592c;
+  --accent2: #ff8c66;
+  --green: #34c759;
+  --blue: #007aff;
+  --yellow: #ffcc00;
+  --red: #ff3b30;
+  --purple: #af52de;
+  --cyan: #5ac8fa;
+  --radius: 12px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'IBM Plex Sans', sans-serif;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+.container { max-width: 1200px; margin: 0 auto; padding: 40px 24px 80px; }
+
+h1 {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.subtitle { color: var(--text2); font-size: 15px; margin-bottom: 48px; }
+
+/* ─── Section ─── */
+.section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 24px;
+  overflow: hidden;
+}
+
+.section-header {
+  align-items: center;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  display: flex;
+  gap: 12px;
+  padding: 20px 24px;
+  transition: background 0.2s;
+  user-select: none;
+}
+
+.section-header:hover { background: #1e1e2e; }
+
+.section-header .icon {
+  align-items: center;
+  border-radius: 8px;
+  display: flex;
+  font-size: 20px;
+  height: 36px;
+  justify-content: center;
+  width: 36px;
+}
+
+.section-header h2 {
+  flex: 1;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.section-header .badge {
+  background: var(--border);
+  border-radius: 20px;
+  color: var(--text2);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  padding: 4px 10px;
+}
+
+.chevron {
+  color: var(--text2);
+  font-size: 14px;
+  transition: transform 0.3s;
+}
+
+.section.open .chevron { transform: rotate(180deg); }
+
+.section-body {
+  display: none;
+  padding: 24px;
+}
+
+.section.open .section-body { display: block; }
+
+/* ─── Flow Diagrams ─── */
+.flow {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  align-items: center;
+  padding: 20px 0;
+}
+
+.flow-row {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.flow-node {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 13px;
+  min-width: 140px;
+  padding: 12px 16px;
+  text-align: center;
+  position: relative;
+}
+
+.flow-node.active { border-color: var(--accent); box-shadow: 0 0 20px rgba(255,89,44,0.15); }
+.flow-node.green { border-color: var(--green); }
+.flow-node.blue { border-color: var(--blue); }
+.flow-node.yellow { border-color: var(--yellow); }
+.flow-node.purple { border-color: var(--purple); }
+.flow-node.cyan { border-color: var(--cyan); }
+.flow-node.red { border-color: var(--red); }
+
+.flow-node .num {
+  background: var(--accent);
+  border-radius: 50%;
+  color: white;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  height: 22px;
+  left: -8px;
+  line-height: 22px;
+  position: absolute;
+  text-align: center;
+  top: -8px;
+  width: 22px;
+}
+
+.flow-node .label { font-weight: 600; margin-bottom: 4px; }
+.flow-node .detail { color: var(--text2); font-size: 11px; }
+.flow-node .file { color: var(--cyan); font-family: 'JetBrains Mono', monospace; font-size: 10px; margin-top: 4px; }
+
+.flow-arrow {
+  color: var(--text2);
+  font-size: 20px;
+  padding: 4px 0;
+}
+
+.flow-arrow-h {
+  color: var(--text2);
+  font-size: 18px;
+}
+
+/* ─── Decision Tree ─── */
+.decision {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 0;
+}
+
+.decision-row {
+  align-items: stretch;
+  display: flex;
+  gap: 12px;
+}
+
+.decision-box {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  flex: 1;
+  padding: 16px;
+}
+
+.decision-box.diamond {
+  background: linear-gradient(135deg, #1a1a26, #22222e);
+  border-color: var(--yellow);
+  text-align: center;
+}
+
+.decision-box h4 {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.decision-box .emoji { font-size: 20px; margin-bottom: 4px; display: block; }
+.decision-box ul { color: var(--text2); font-size: 12px; list-style: none; }
+.decision-box ul li { padding: 2px 0; }
+.decision-box ul li::before { content: "→ "; color: var(--accent); }
+
+/* ─── Table ─── */
+.info-table {
+  border-collapse: collapse;
+  font-size: 13px;
+  width: 100%;
+}
+
+.info-table th {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text2);
+  font-weight: 500;
+  padding: 10px 14px;
+  text-align: left;
+}
+
+.info-table td {
+  border: 1px solid var(--border);
+  padding: 10px 14px;
+}
+
+.info-table .mono {
+  color: var(--cyan);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+}
+
+.info-table .tag {
+  border-radius: 4px;
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+}
+
+.tag-green { background: rgba(52,199,89,0.15); color: var(--green); }
+.tag-blue { background: rgba(0,122,255,0.15); color: var(--blue); }
+.tag-yellow { background: rgba(255,204,0,0.15); color: var(--yellow); }
+.tag-red { background: rgba(255,59,48,0.15); color: var(--red); }
+.tag-purple { background: rgba(175,82,222,0.15); color: var(--purple); }
+.tag-accent { background: rgba(255,89,44,0.15); color: var(--accent); }
+
+/* ─── Verification Flow ─── */
+.verify-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.verify-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.verify-card h4 { font-size: 14px; margin-bottom: 8px; }
+.verify-card p { color: var(--text2); font-size: 12px; }
+.verify-card .when { color: var(--yellow); font-family: 'JetBrains Mono', monospace; font-size: 11px; margin-top: 8px; }
+
+/* ─── Legend ─── */
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.legend-item {
+  align-items: center;
+  display: flex;
+  font-size: 12px;
+  gap: 6px;
+}
+
+.legend-dot {
+  border-radius: 50%;
+  height: 10px;
+  width: 10px;
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>Claude Code — System Architecture</h1>
+<p class="subtitle">Правила, скиллы, протоколы и их взаимодействие. Кликните на секцию для раскрытия.</p>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SECTION 1: Main Response Flow -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="section open" id="s1">
+<div class="section-header" onclick="toggle('s1')">
+  <div class="icon" style="background:rgba(255,89,44,0.15)">🔄</div>
+  <h2>Каждый ответ — 5 шагов</h2>
+  <span class="badge">core-rules.md</span>
+  <span class="chevron">▾</span>
+</div>
+<div class="section-body">
+  <p style="color:var(--text2); font-size:13px; margin-bottom:20px">Эта последовательность выполняется в КАЖДОМ ответе Claude, независимо от задачи.</p>
+  <div class="flow">
+    <div class="flow-node active">
+      <span class="num">0</span>
+      <div class="label">Сложность</div>
+      <div class="detail">🟢 SIMPLE | 🟡 STANDARD | 🔴 COMPLEX</div>
+      <div class="file">Первая строка каждого ответа</div>
+    </div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-node blue">
+      <span class="num">1</span>
+      <div class="label">Routing + Протокол</div>
+      <div class="detail">Определить тип задачи → прочитать protocol-*.md</div>
+      <div class="file">Только для STANDARD/COMPLEX</div>
+    </div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-node green">
+      <span class="num">2</span>
+      <div class="label">Выполнение</div>
+      <div class="detail">Маленькие шаги, один файл за раз, sequential impl</div>
+      <div class="file">types → api → hooks → components → pages</div>
+    </div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-node yellow">
+      <span class="num">3</span>
+      <div class="label">Проверка</div>
+      <div class="detail">Cross-check + Challenge + Confidence + Visual Diff</div>
+      <div class="file">/verify + /visual-diff</div>
+    </div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-node purple">
+      <span class="num">4</span>
+      <div class="label">DONE блок</div>
+      <div class="detail">Сложность + Что сделано + Проверки + Уверенность %</div>
+      <div class="file">ОБЯЗАТЕЛЬНО в конце КАЖДОГО ответа</div>
+    </div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-node" style="border-color: var(--text2)">
+      <span class="num" style="background:var(--text2)">5</span>
+      <div class="label">Post-Task Housekeeping</div>
+      <div class="detail">Subtasks [x] + AGENTS.md + Memory + Reflection</div>
+      <div class="file">После каждого блока задач</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SECTION 2: Complexity Routing -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="section" id="s2">
+<div class="section-header" onclick="toggle('s2')">
+  <div class="icon" style="background:rgba(255,204,0,0.15)">🔀</div>
+  <h2>Маршрутизация по сложности</h2>
+  <span class="badge">ШАГ 0 → ШАГ 1</span>
+  <span class="chevron">▾</span>
+</div>
+<div class="section-body">
+  <div class="decision">
+    <div class="decision-row">
+      <div class="decision-box diamond">
+        <span class="emoji">❓</span>
+        <h4>Оценка сложности</h4>
+        <p style="color:var(--text2); font-size:12px">Сколько файлов? Какой scope?</p>
+      </div>
+    </div>
+    <div class="decision-row">
+      <div class="decision-box" style="border-color:var(--green)">
+        <span class="emoji">🟢</span>
+        <h4>SIMPLE</h4>
+        <ul>
+          <li>1-2 файла, typo, стиль</li>
+          <li>Execute → Verify → DONE</li>
+          <li>Без Prompt Prep</li>
+          <li>Без протокола</li>
+        </ul>
+      </div>
+      <div class="decision-box" style="border-color:var(--yellow)">
+        <span class="emoji">🟡</span>
+        <h4>STANDARD</h4>
+        <ul>
+          <li>Фича, баг, несколько файлов</li>
+          <li>Prompt Prep → Plan → Execute → Verify → DONE</li>
+          <li>Routing → Protocol</li>
+          <li>RAT check</li>
+        </ul>
+      </div>
+      <div class="decision-box" style="border-color:var(--red)">
+        <span class="emoji">🔴</span>
+        <h4>COMPLEX</h4>
+        <ul>
+          <li>Архитектура, миграция</li>
+          <li>Prompt Prep → Plan → Execute → Verify + CTO Review → DONE</li>
+          <li>Routing → Protocol</li>
+          <li>RAT + Escalation</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <h3 style="margin: 24px 0 12px; font-size: 16px;">Routing Table → Протоколы</h3>
+  <table class="info-table">
+    <tr><th>Тип задачи</th><th>Протокол</th><th>Ключевые шаги</th></tr>
+    <tr>
+      <td>Новая фича / доработка</td>
+      <td class="mono">protocol-development.md</td>
+      <td>Duplicate Check → JTBD → TDD (Red→Green→Refactor)</td>
+    </tr>
+    <tr>
+      <td>Баг / ошибка</td>
+      <td class="mono">protocol-bugfix.md</td>
+      <td>STOP → CAPTURE → 5 Whys → Fix Root Cause → Prevent</td>
+    </tr>
+    <tr>
+      <td>Рефакторинг</td>
+      <td class="mono">protocol-refactoring.md</td>
+      <td>Tests FIRST → Small Steps → Run Tests After Each</td>
+    </tr>
+    <tr>
+      <td>Данные / анализ</td>
+      <td class="mono">protocol-research.md</td>
+      <td>Load → Schema → Profile → Hypothesis → Experiment</td>
+    </tr>
+    <tr>
+      <td>Зависание / freeze</td>
+      <td class="mono">protocol-freeze-recovery.md</td>
+      <td>Understand Before Retry</td>
+    </tr>
+  </table>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SECTION 3: Migration Pipeline -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="section" id="s3">
+<div class="section-header" onclick="toggle('s3')">
+  <div class="icon" style="background:rgba(0,122,255,0.15)">🏗️</div>
+  <h2>Migration Pipeline (WORKFLOW.md)</h2>
+  <span class="badge">6 этапов • ALL mandatory</span>
+  <span class="chevron">▾</span>
+</div>
+<div class="section-body">
+  <p style="color:var(--text2); font-size:13px; margin-bottom:20px">Каждая задача с кодом проходит ВСЕ 6 этапов. Без исключений.</p>
+
+  <div class="flow">
+    <div class="flow-row">
+      <div class="flow-node active" style="min-width:160px">
+        <span class="num">1</span>
+        <div class="label">TASK</div>
+        <div class="detail">Scope, parent tasks, sub-tasks</div>
+        <div class="file">tasks-migrate-{section}.md</div>
+      </div>
+      <span class="flow-arrow-h">→</span>
+      <div class="flow-node blue" style="min-width:160px">
+        <span class="num" style="background:var(--blue)">2</span>
+        <div class="label">ANALYSIS</div>
+        <div class="detail">CTO + Senior FE review</div>
+        <div class="file">analysis-{section}.md</div>
+      </div>
+      <span class="flow-arrow-h">→</span>
+      <div class="flow-node green" style="min-width:160px">
+        <span class="num" style="background:var(--green)">3</span>
+        <div class="label">IMPLEMENT</div>
+        <div class="detail">TDD: Red → Green → Refactor</div>
+        <div class="file">Source code + tests</div>
+      </div>
+    </div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-row">
+      <div class="flow-node purple" style="min-width:160px">
+        <span class="num" style="background:var(--purple)">6</span>
+        <div class="label">REFLECTION</div>
+        <div class="detail">7 вопросов, gap analysis</div>
+        <div class="file">reflection.md</div>
+      </div>
+      <span class="flow-arrow-h">←</span>
+      <div class="flow-node cyan" style="min-width:160px">
+        <span class="num" style="background:var(--cyan)">5</span>
+        <div class="label">TESTING</div>
+        <div class="detail">tsc + vitest + build + <b>visual diff &lt;1%</b></div>
+        <div class="file">testing-{section}.md</div>
+      </div>
+      <span class="flow-arrow-h">←</span>
+      <div class="flow-node yellow" style="min-width:160px">
+        <span class="num" style="background:var(--yellow)">4</span>
+        <div class="label">REVIEW</div>
+        <div class="detail">Architecture + Code quality</div>
+        <div class="file">review-{section}.md</div>
+      </div>
+    </div>
+  </div>
+
+  <h3 style="margin: 24px 0 12px; font-size: 16px;">Hard Stops</h3>
+  <table class="info-table">
+    <tr><th>Правило</th><th>Блокирует</th></tr>
+    <tr><td>Нет <span class="mono">analysis-{}.md</span></td><td><span class="tag tag-red">Нельзя кодить (этап 3)</span></td></tr>
+    <tr><td>Нет <span class="mono">review-{}.md</span></td><td><span class="tag tag-red">Нельзя говорить "готово"</span></td></tr>
+    <tr><td>Нет <span class="mono">reflection.md</span></td><td><span class="tag tag-red">Нельзя писать DONE блок</span></td></tr>
+    <tr><td>Visual diff > 1%</td><td><span class="tag tag-red">Нельзя говорить "визуально совпадает"</span></td></tr>
+    <tr><td>"Давай дальше" от пользователя</td><td><span class="tag tag-yellow">НЕ отменяет pipeline</span></td></tr>
+  </table>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SECTION 4: Verification -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="section" id="s4">
+<div class="section-header" onclick="toggle('s4')">
+  <div class="icon" style="background:rgba(52,199,89,0.15)">✅</div>
+  <h2>Verification Flow (ШАГ 3)</h2>
+  <span class="badge">4 проверки</span>
+  <span class="chevron">▾</span>
+</div>
+<div class="section-body">
+  <div class="verify-grid">
+    <div class="verify-card" style="border-color:var(--green)">
+      <h4>📋 Cross-check</h4>
+      <p>Каждый файл ОТКРЫТЬ и проверить ДРУГИМ методом. Таблица: файл → открыт → проверен.</p>
+      <div class="when">Когда: КАЖДЫЙ ответ</div>
+    </div>
+    <div class="verify-card" style="border-color:var(--yellow)">
+      <h4>🤔 Challenge (4 вопроса)</h4>
+      <p>1. Как опровергнуть? 2. Все файлы открыл? 3. Edge cases? 4. Job решён?</p>
+      <div class="when">Когда: КАЖДЫЙ ответ</div>
+    </div>
+    <div class="verify-card" style="border-color:var(--blue)">
+      <h4>📊 Confidence Score</h4>
+      <p>100% минус: не тестировал (−50%), не открывал (−40%), нет cross-check (−30%), assumptions (−25%)</p>
+      <div class="when">Когда: КАЖДЫЙ ответ</div>
+    </div>
+    <div class="verify-card" style="border-color:var(--accent)">
+      <h4>📸 Visual Diff</h4>
+      <p><code>python3 scripts/visual-diff.py {page}</code><br>Playwright + pixelmatch → diff image → итерировать пока diff &lt; 1%</p>
+      <div class="when">Когда: ЛЮБОЕ CSS/SCSS изменение</div>
+    </div>
+    <div class="verify-card" style="border-color:var(--purple)">
+      <h4>🎯 RAT (Riskiest Assumption)</h4>
+      <p>Category 0: "Я правильно понял запрос?" Проверить TOP-1 assumption ПЕРЕД кодом.</p>
+      <div class="when">Когда: STANDARD / COMPLEX</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SECTION 5: Skills Map -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="section" id="s5">
+<div class="section-header" onclick="toggle('s5')">
+  <div class="icon" style="background:rgba(175,82,222,0.15)">⚡</div>
+  <h2>Skills — когда что запускается</h2>
+  <span class="badge">.claude/skills/</span>
+  <span class="chevron">▾</span>
+</div>
+<div class="section-body">
+
+  <h3 style="margin-bottom: 12px; font-size: 16px;">Протоколы (автомат через Routing Table)</h3>
+  <table class="info-table">
+    <tr><th>Skill</th><th>Trigger</th><th>Что делает</th></tr>
+    <tr>
+      <td class="mono">/protocol-development</td>
+      <td>Слова: добавить, создать, фича</td>
+      <td>PRE-ACTION (Duplicate Check + JTBD) → TDD Phase 0-4</td>
+    </tr>
+    <tr>
+      <td class="mono">/protocol-bugfix</td>
+      <td>Слова: ошибка, баг, не работает</td>
+      <td>STOP → CAPTURE → 5 Whys → Fix Root Cause</td>
+    </tr>
+    <tr>
+      <td class="mono">/protocol-refactoring</td>
+      <td>Слова: рефакторинг, улучшить</td>
+      <td>Tests BEFORE refactoring, small steps</td>
+    </tr>
+    <tr>
+      <td class="mono">/protocol-research</td>
+      <td>Слова: данные, анализ</td>
+      <td>Data first, hypothesis-driven</td>
+    </tr>
+  </table>
+
+  <h3 style="margin: 24px 0 12px; font-size: 16px;">Process Skills (вручную или по ситуации)</h3>
+  <table class="info-table">
+    <tr><th>Skill</th><th>Когда</th><th>Что делает</th></tr>
+    <tr>
+      <td class="mono">/verify</td>
+      <td><span class="tag tag-red">Перед КАЖДЫМ DONE</span></td>
+      <td>Cross-check + Challenge + Confidence + RAT</td>
+    </tr>
+    <tr>
+      <td class="mono">/visual-diff</td>
+      <td><span class="tag tag-accent">Любое CSS изменение</span></td>
+      <td>Playwright screenshot → pixelmatch → diff image → iterate &lt;1%</td>
+    </tr>
+    <tr>
+      <td class="mono">/reflection</td>
+      <td><span class="tag tag-purple">После каждого pipeline цикла</span></td>
+      <td>7 вопросов + gap analysis + RESEARCH.md update</td>
+    </tr>
+    <tr>
+      <td class="mono">/start</td>
+      <td><span class="tag tag-green">Начало сессии</span></td>
+      <td>Read context, git status, pending tasks</td>
+    </tr>
+    <tr>
+      <td class="mono">/session-end</td>
+      <td><span class="tag tag-blue">Конец сессии</span></td>
+      <td>Update memory, log errors, quality score</td>
+    </tr>
+    <tr>
+      <td class="mono">/check-duplicates</td>
+      <td><span class="tag tag-yellow">Перед созданием файла</span></td>
+      <td>Проверка на дублирование</td>
+    </tr>
+  </table>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SECTION 6: Visual Diff Pipeline -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="section" id="s6">
+<div class="section-header" onclick="toggle('s6')">
+  <div class="icon" style="background:rgba(255,89,44,0.15)">📸</div>
+  <h2>Visual Diff Pipeline (подробно)</h2>
+  <span class="badge">scripts/visual-diff.py</span>
+  <span class="chevron">▾</span>
+</div>
+<div class="section-body">
+  <div class="flow">
+    <div class="flow-node active">
+      <div class="label">1. Reference Screenshot</div>
+      <div class="detail">Playwright → old project (production)</div>
+      <div class="file">{page}_reference.png</div>
+    </div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-node blue">
+      <div class="label">2. Current Screenshot</div>
+      <div class="detail">Playwright → new project (localhost:3000)</div>
+      <div class="file">{page}_current.png</div>
+    </div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-node yellow">
+      <div class="label">3. Pixel Diff</div>
+      <div class="detail">pixelmatch → diff % + diff image</div>
+      <div class="file">{page}_diff.png</div>
+    </div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-node" style="border-color:var(--red)">
+      <div class="label">4. diff &gt; 1%?</div>
+      <div class="detail">Да → Agent читает diff image → красные зоны</div>
+    </div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-node green">
+      <div class="label">5. Fix CSS</div>
+      <div class="detail">Исправить конкретные расхождения по красным зонам</div>
+    </div>
+    <div class="flow-arrow" style="color:var(--accent)">↻ Повторить 1-5</div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-node green" style="border-width:2px">
+      <div class="label">✅ diff &lt; 1%</div>
+      <div class="detail">DONE — visual match подтверждён</div>
+    </div>
+  </div>
+
+  <div style="background:var(--surface2); border-radius:8px; padding:16px; margin-top:16px">
+    <h4 style="font-size:14px; margin-bottom:8px">Proven Results</h4>
+    <table class="info-table">
+      <tr><th>Итерация</th><th>Diff %</th><th>Что исправлено</th></tr>
+      <tr><td>1 (baseline)</td><td><span class="tag tag-red">5.12%</span></td><td>—</td></tr>
+      <tr><td>2</td><td><span class="tag tag-yellow">2.72%</span></td><td>+OAuth placeholder кнопки, +divider</td></tr>
+      <tr><td>3</td><td><span class="tag tag-yellow">2.75%</span></td><td>+border-radius, +Yandex badge</td></tr>
+      <tr><td>Residual</td><td colspan="2" style="color:var(--text2)">Locale differences (logo text, language) — not CSS</td></tr>
+    </table>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SECTION 7: File Artifacts -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="section" id="s7">
+<div class="section-header" onclick="toggle('s7')">
+  <div class="icon" style="background:rgba(90,200,250,0.15)">📁</div>
+  <h2>Артефакты и файловая структура</h2>
+  <span class="badge">tasks/ + .claude/</span>
+  <span class="chevron">▾</span>
+</div>
+<div class="section-body">
+  <table class="info-table">
+    <tr><th>Файл</th><th>Создаётся на этапе</th><th>Назначение</th></tr>
+    <tr>
+      <td class="mono">tasks/{section}/tasks-migrate-{section}.md</td>
+      <td><span class="tag tag-accent">1. TASK</span></td>
+      <td>Список задач и sub-tasks</td>
+    </tr>
+    <tr>
+      <td class="mono">tasks/{section}/analysis-{section}.md</td>
+      <td><span class="tag tag-blue">2. ANALYSIS</span></td>
+      <td>CTO + Senior FE review</td>
+    </tr>
+    <tr>
+      <td class="mono">Source code + .test.tsx</td>
+      <td><span class="tag tag-green">3. IMPLEMENT</span></td>
+      <td>Код + тесты</td>
+    </tr>
+    <tr>
+      <td class="mono">tasks/{section}/review-{section}.md</td>
+      <td><span class="tag tag-yellow">4. REVIEW</span></td>
+      <td>Code review verdict</td>
+    </tr>
+    <tr>
+      <td class="mono">tasks/{section}/testing-{section}.md</td>
+      <td><span class="tag tag-purple">5. TESTING</span></td>
+      <td>Test results + visual diff %</td>
+    </tr>
+    <tr>
+      <td class="mono">tasks/{section}/reflection.md</td>
+      <td><span class="tag tag-accent">6. REFLECTION</span></td>
+      <td>7 вопросов + improvements</td>
+    </tr>
+    <tr>
+      <td class="mono">test-results/visual-diff/{page}_diff.png</td>
+      <td><span class="tag tag-accent">/visual-diff</span></td>
+      <td>Pixel diff image</td>
+    </tr>
+    <tr>
+      <td class="mono">AGENTS.md</td>
+      <td><span class="tag tag-green">Post-task</span></td>
+      <td>Architecture, status, stack</td>
+    </tr>
+    <tr>
+      <td class="mono">RESEARCH.md</td>
+      <td><span class="tag tag-blue">Ongoing</span></td>
+      <td>Old project encyclopedia</td>
+    </tr>
+    <tr>
+      <td class="mono">memory/MEMORY.md</td>
+      <td><span class="tag tag-purple">Ongoing</span></td>
+      <td>Cross-session memory index</td>
+    </tr>
+  </table>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SECTION 8: Forbidden -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="section" id="s8">
+<div class="section-header" onclick="toggle('s8')">
+  <div class="icon" style="background:rgba(255,59,48,0.15)">🚫</div>
+  <h2>Forbidden Actions</h2>
+  <span class="badge">Нарушение = СТОП</span>
+  <span class="chevron">▾</span>
+</div>
+<div class="section-body">
+  <div class="verify-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr))">
+    <div class="verify-card" style="border-color:var(--red)">
+      <h4>❌ Файлы</h4>
+      <p>Нет <code>_fixed</code>, <code>_final</code>, <code>_v2</code>. Нет перезаписи целиком. Нет дубликатов.</p>
+    </div>
+    <div class="verify-card" style="border-color:var(--red)">
+      <h4>❌ Верификация</h4>
+      <p>"Готово" без открытия файлов. "Работает" без запуска. "Совпадает" без diff &lt;1%.</p>
+    </div>
+    <div class="verify-card" style="border-color:var(--red)">
+      <h4>❌ Процесс</h4>
+      <p>Код ДО test cases. Пропуск Prompt Prep. git push без тестов. Пропуск pipeline этапов.</p>
+    </div>
+    <div class="verify-card" style="border-color:var(--red)">
+      <h4>❌ Иконки/Стили</h4>
+      <p>Никогда не рисовать SVG "по памяти". Только из albato-kit/Icon/. Не использовать Tailwind.</p>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div>Core flow</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--blue)"></div>Analysis</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>Implementation</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--yellow)"></div>Review/Check</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--purple)"></div>Reflection</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--cyan)"></div>Testing</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div>Blocking</div>
+</div>
+
+</div>
+
+<script>
+function toggle(id) {
+  document.getElementById(id).classList.toggle('open');
+}
+</script>
+</body>
+</html>
