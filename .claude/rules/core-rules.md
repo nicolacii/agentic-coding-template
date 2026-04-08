@@ -1,18 +1,39 @@
-# Core Rules v5.2
+# Core Rules v5.3
 
 > Always-loaded. Каждый ответ Claude Code следует этой структуре.
 > Skills из `.claude/skills/` загружаются on-demand в точках, указанных ниже.
+
+## Project Initialization
+
+При первом запуске в новом проекте → запустить `/init-project` для интерактивной настройки:
+- Project type, languages, stack
+- Multi-agent mode (none / lightweight / full)
+- Sub-agent roles
+- Conventions, visual reference URLs
+
+Создаёт: `.claude/project-config.yml`, `PROJECT_KNOWLEDGE.md`, `.claude/sub-agents/*.md`
 
 ## Memory entrypoints (читать при необходимости)
 
 | Файл | Назначение | Когда читать |
 |------|-----------|-------------|
 | `PROJECT_KNOWLEDGE.md` | Главная точка входа памяти | Начало сессии (`/start`) |
+| `.claude/project-config.yml` | Stack, multi-agent config | Перед `/orchestrate` |
 | `BACKLOG.md` | Реестр задач + приоритеты + история | Перед взятием новой задачи |
 | `CHANGELOG.md` | История изменений | Перед merge или release |
 | `docs/adr/` | Архитектурные решения | При архитектурных вопросах |
 | `tasks/improvements.md` | Backlog улучшений | Перед `/backlog-to-rules` |
 | `tasks/reflection-history.md` | История рефлексий + lessons | Для поиска повторяющихся проблем |
+
+## Multi-Agent Orchestration
+
+Для COMPLEX задач (XL, 10+ файлов legacy, миграции) → использовать `/orchestrate`:
+- Orchestrator делегирует работу sub-agents через Task tool
+- Sub-agents работают в isolated contexts (analysts, developers, reviewers, qa)
+- Коммуникация через файлы в `tasks/{section}/`
+- Orchestrator не читает большие объёмы кода — только summaries
+
+Условие: `multi_agent.enabled: true` в `.claude/project-config.yml`. Если выключено — делать всё самостоятельно.
 
 ---
 

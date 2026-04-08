@@ -1,8 +1,16 @@
-# Claude Code Framework v2
+# Claude Code Framework v3
 
-Фреймворк для структурированной разработки с AI-агентом (Claude Code). Обеспечивает предсказуемое качество через правила, протоколы, верификацию, рефлексию и self-improvement loop.
+Фреймворк для структурированной разработки с AI-агентом (Claude Code). Обеспечивает предсказуемое качество через правила, протоколы, верификацию, рефлексию, self-improvement loop и multi-agent orchestration.
 
-## Что нового в v2
+## Что нового в v3
+
+- 🆕 **Multi-agent orchestration** — для XL задач, sub-agents в isolated contexts
+- 🆕 **`/init-project` wizard** — интерактивная настройка нового проекта
+- 🆕 **Universal sub-agent templates** — analyst, developer, reviewer, qa роли
+- 🆕 **`.claude/project-config.yml`** — конфигурация stack, ролей, конвенций
+- 🆕 **26 skills** (было 24) — добавлены init-project и orchestrate
+
+## Что было в v2
 
 - ✅ **Git workflow** интегрирован в pipeline (feature branch → PR → merge)
 - ✅ **ADR (Architecture Decision Records)** — фиксация архитектурных решений
@@ -10,7 +18,7 @@
 - ✅ **CHANGELOG.md** — история изменений
 - ✅ **PROJECT_KNOWLEDGE.md** — единая точка входа памяти проекта
 - ✅ **Reflection enforcement** — рефлексия ОБЯЗАНА создать минимум 1 артефакт
-- ✅ **24 skills с правильными frontmatter** — Claude автоматически детектит
+- ✅ **Skills с правильными frontmatter** — Claude автоматически детектит
 - ✅ **Архивация tasks/** — скрипт для квартальной архивации
 - ✅ **Lightweight mode** — упрощённый pipeline для S задач
 
