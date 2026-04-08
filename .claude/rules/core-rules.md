@@ -71,6 +71,31 @@ Goal: [результат]  Constraints: [ЦИТАТЫ из запроса]  Pro
 **1c. RAT** — `/validate-from-end` для STANDARD/COMPLEX:
 Определить expected output ПЕРЕД началом работы. Category 0: "Я правильно понял запрос?"
 
+**1d. Orchestration Decision (АВТОМАТИЧЕСКАЯ для STANDARD/COMPLEX):**
+
+```
+1. Прочитать .claude/project-config.yml → multi_agent.enabled?
+2. Если файла нет ИЛИ enabled: false → делать всё самостоятельно (skip)
+3. Если enabled: true:
+   - 🔴 COMPLEX → ОБЯЗАН использовать /orchestrate (auto)
+   - 🟡 STANDARD И 5+ файлов → ОБЯЗАН использовать /orchestrate (auto)
+   - 🟡 STANDARD И < 5 файлов → опционально, на усмотрение
+   - 🟢 SIMPLE → НЕ использовать (overhead больше выгоды)
+```
+
+**Auto-orchestration triggers** (агент должен САМ запустить, без явной просьбы):
+- Сложность COMPLEX
+- Размер задачи L/XL в `BACKLOG.md`
+- Задача упоминает 10+ файлов legacy
+- Задача = миграция целого раздела
+- Задача требует sequential implementation в 3+ слоях (types → api → ui)
+
+**Когда НЕ оркестрировать (даже COMPLEX):**
+- `multi_agent.enabled: false`
+- Пользователь явно сказал "сделай сам"
+- Cross-stage memory critical (refactoring across many files)
+- Контекст orchestrator уже занят (>50K tokens)
+
 ## ШАГ 2: Выполнение
 
 - Один файл за раз

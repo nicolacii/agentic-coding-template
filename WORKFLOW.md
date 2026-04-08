@@ -51,14 +51,25 @@ git checkout -b feat/error-pages
 
 ## Этап 2: ANALYSIS
 
-**Выход:** `tasks/{section}/analysis-{section}.md`
+**Выход:**
+- Manual: `tasks/{section}/analysis-{section}.md`
+- Orchestrated: `tasks/{section}/analyst-architect.md` + `analyst-*.md` файлы
 
-**Анализ архитектуры:**
-- Data flow, dependencies, API endpoints
-- State shape, risks, recommendations
+### Auto-orchestration (для COMPLEX с `multi_agent.enabled: true`)
 
-**Анализ кода:**
-- Component assessment, code smells, decomposition
+Orchestrator АВТОМАТИЧЕСКИ spawn analysts параллельно через Task tool:
+```
+Task("analyst-architect") + Task("analyst-fe-senior")  # parallel
+```
+
+После завершения:
+1. Orchestrator читает output файлы
+2. Aggregates → `tasks/{section}/implementation-plan.md`
+
+### Manual mode
+
+**Анализ архитектуры:** data flow, dependencies, API endpoints, state shape, risks
+**Анализ кода:** component assessment, code smells, decomposition
 
 **Если задача архитектурная** → создать **ADR** в `docs/adr/` (см. ADR template).
 
@@ -67,6 +78,22 @@ git checkout -b feat/error-pages
 ## Этап 3: IMPLEMENT
 
 **Выход:** код + тесты в feature branch
+
+### Auto-orchestration (для COMPLEX)
+
+Orchestrator АВТОМАТИЧЕСКИ spawn developers SEQUENTIALLY:
+```
+Task("developer-types")     # 1st
+→ wait → read output
+Task("developer-api")       # 2nd, reads developer-types output
+→ wait → read output
+Task("developer-ui")        # 3rd, reads developer-api output
+→ wait → read output
+```
+
+Sequential потому что слои зависят друг от друга. Orchestrator контекст не растёт — sub-agents работают изолированно.
+
+### Manual mode
 
 **Hard Stop:** перед кодом
 ```
@@ -88,7 +115,20 @@ git checkout -b feat/error-pages
 
 ## Этап 4: REVIEW
 
-**Выход:** `tasks/{section}/review-{section}.md`
+**Выход:** `tasks/{section}/review-{section}.md` ИЛИ `reviewer-*.md` файлы
+
+### Auto-orchestration (для COMPLEX)
+
+Orchestrator АВТОМАТИЧЕСКИ spawn reviewers PARALLEL:
+```
+Task("reviewer-architect") + Task("reviewer-fe-senior")  # parallel
++ Task("reviewer-security")   # if backend project
++ Task("reviewer-backend")    # if backend project
+```
+
+Если verdict = CHANGES REQUESTED → orchestrator spawn нужного developer для fix → re-review.
+
+### Manual mode
 
 Проверить: архитектура, типы, тесты, accessibility, security.
 
@@ -98,7 +138,18 @@ git checkout -b feat/error-pages
 
 ## Этап 5: TESTING
 
-**Выход:** `tasks/{section}/testing-{section}.md`
+**Выход:** `tasks/{section}/testing-{section}.md` ИЛИ `qa-results.md`
+
+### Auto-orchestration (для COMPLEX)
+
+Orchestrator АВТОМАТИЧЕСКИ spawn qa:
+```
+Task("qa") → runs tsc, vitest, build, visual-diff
+```
+
+QA sub-agent итерирует visual-diff пока < 1%.
+
+### Manual mode
 
 ```
 [ ] TypeScript: 0 errors
