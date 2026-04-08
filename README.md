@@ -1,22 +1,41 @@
-# Claude Code Framework
+# Claude Code Framework v2
 
-Фреймворк для структурированной разработки с AI-агентом (Claude Code). Обеспечивает предсказуемое качество через правила, протоколы, верификацию и рефлексию.
+Фреймворк для структурированной разработки с AI-агентом (Claude Code). Обеспечивает предсказуемое качество через правила, протоколы, верификацию, рефлексию и self-improvement loop.
+
+## Что нового в v2
+
+- ✅ **Git workflow** интегрирован в pipeline (feature branch → PR → merge)
+- ✅ **ADR (Architecture Decision Records)** — фиксация архитектурных решений
+- ✅ **BACKLOG.md** — единый реестр задач с приоритетами
+- ✅ **CHANGELOG.md** — история изменений
+- ✅ **PROJECT_KNOWLEDGE.md** — единая точка входа памяти проекта
+- ✅ **Reflection enforcement** — рефлексия ОБЯЗАНА создать минимум 1 артефакт
+- ✅ **24 skills с правильными frontmatter** — Claude автоматически детектит
+- ✅ **Архивация tasks/** — скрипт для квартальной архивации
+- ✅ **Lightweight mode** — упрощённый pipeline для S задач
 
 ## Быстрый старт
 
 ```bash
 # 1. Скопировать в свой проект
 cp -r claude-code-framework/.claude /path/to/your/project/
-cp claude-code-framework/CLAUDE.md /path/to/your/project/
-cp claude-code-framework/WORKFLOW.md /path/to/your/project/
 cp -r claude-code-framework/scripts /path/to/your/project/
 cp -r claude-code-framework/tasks /path/to/your/project/
+cp -r claude-code-framework/templates /path/to/your/project/
+cp -r claude-code-framework/docs /path/to/your/project/
+cp claude-code-framework/CLAUDE.md /path/to/your/project/
+cp claude-code-framework/WORKFLOW.md /path/to/your/project/
+cp claude-code-framework/BACKLOG.md /path/to/your/project/
+cp claude-code-framework/CHANGELOG.md /path/to/your/project/
+cp claude-code-framework/PROJECT_KNOWLEDGE.md /path/to/your/project/
 
-# 2. Настроить visual-diff (опционально)
+# 2. Заполнить PROJECT_KNOWLEDGE.md — описание проекта, стек, конвенции
+
+# 3. Настроить visual-diff (опционально)
 # Отредактировать scripts/visual-diff.py — указать URL reference и localhost
 
-# 3. Начать работу
-# Claude Code автоматически прочитает CLAUDE.md и .claude/rules/
+# 4. Начать работу
+# Claude Code автоматически прочитает CLAUDE.md, PROJECT_KNOWLEDGE.md, .claude/rules/
 ```
 
 ---

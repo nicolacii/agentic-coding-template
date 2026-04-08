@@ -1,3 +1,8 @@
+---
+name: validate-from-end
+description: Validate from end skill — define expected output BEFORE starting work, then verify after. MANDATORY for STANDARD/COMPLEX tasks. Prevents agent from working without clear success criteria. Outputs Goal, Expected Artifacts, Acceptance Criteria.
+---
+
 # Skill: Validate From End
 
 > Валидация от результата — определить ожидаемый output ПЕРЕД работой, затем проверить.

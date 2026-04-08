@@ -1,3 +1,8 @@
+---
+name: backlog-to-rules
+description: Convert accumulated improvements from tasks/improvements.md into actual rules in core-rules.md, WORKFLOW.md, or new skills. Use when 5+ improvements have accumulated. Transforms backlog ideas into enforceable rules.
+---
+
 # Skill: Backlog to Rules
 
 > Внедрение накопленных улучшений из backlog/рефлексий в правила проекта.

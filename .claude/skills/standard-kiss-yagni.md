@@ -1,3 +1,8 @@
+---
+name: standard-kiss-yagni
+description: KISS/YAGNI/MVP principles with 8 over-engineering red flags. Use to prevent unnecessary abstractions, factories, "code for the future", or premature optimization. Triggered when adding abstractions or layers.
+---
+
 # Standard: KISS / YAGNI / MVP
 
 ## Context

@@ -1,3 +1,8 @@
+---
+name: error-learning
+description: Error learning skill — record and analyze bugs after fixing. Use AFTER every bugfix to capture Symptom → Root Cause → Fix → Prevention. Updates memory/feedback files and tasks/reflection-history.md. Prevents same error from happening again.
+---
+
 # Skill: Error Learning
 
 > Единая точка входа для записи и анализа ошибок. Дополняет protocol-bugfix (step LEARN).

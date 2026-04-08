@@ -1,3 +1,8 @@
+---
+name: standard-api-testing
+description: API testing patterns with authentication — how to test endpoints requiring auth tokens, mocking strategies, integration vs unit testing. Use when writing API tests.
+---
+
 # Standard: API Testing with Auth
 
 > Паттерн тестирования API endpoints, требующих авторизацию.

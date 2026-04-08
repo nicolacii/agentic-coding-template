@@ -1,3 +1,8 @@
+---
+name: evaluate-jobs
+description: JTBD (Jobs To Be Done) analysis for landings, UI/UX, product decisions. Use when evaluating user-facing features, landings, copywriting, or product flows. Outputs Job Story, blockers, success metrics.
+---
+
 # Skill: JTBD Evaluation
 
 > Анализ лендингов, интерфейсов и продуктовых решений через Jobs To Be Done.

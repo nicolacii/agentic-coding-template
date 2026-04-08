@@ -1,3 +1,8 @@
+---
+name: protocol-research
+description: Protocol for data analysis and research tasks. Triggers on keywords данные, анализ, исследование, research, data, analyze, investigate, dataset. Enforces Data First Code Second — verify schema, profile, hypothesis before any code.
+---
+
 # Protocol: Data Research
 
 ## Context

@@ -1,3 +1,8 @@
+---
+name: verify
+description: Complete verification before saying "done". MANDATORY before EVERY DONE block. Combines Cross-check (open every file), Challenge (4 questions), Confidence Score (0-100%), Forbidden Actions check, and RAT (Riskiest Assumption Test). Prevents premature "done" claims.
+---
+
 # Skill: Verify — Полная верификация перед "готово"
 
 > Комбинация Cross-check + Challenge + Confidence + Forbidden. Вызывается ПЕРЕД каждым DONE блоком.

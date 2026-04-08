@@ -1,3 +1,8 @@
+---
+name: start
+description: Session initialization skill. Use at the beginning of every work session to read project context, check git status, identify pending tasks, and propose next steps. Reads PROJECT_KNOWLEDGE.md, BACKLOG.md, recent reflections.
+---
+
 # Skill: Session Start
 
 > Инициализация рабочей сессии. Читает контекст, показывает статус, предлагает следующие шаги.

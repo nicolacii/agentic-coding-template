@@ -1,3 +1,8 @@
+---
+name: check-duplicates
+description: Duplicate check before creating any new file, function, or component. MANDATORY in PRE-ACTION phase of protocol-development. Prevents creating duplicate code by searching existing files via glob/grep patterns. Triggers when creating new file, component, hook, or utility.
+---
+
 # Skill: Check Duplicates
 
 > Проверка на дублирование перед созданием нового файла/функции/компонента.

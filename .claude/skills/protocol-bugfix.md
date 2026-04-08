@@ -1,3 +1,8 @@
+---
+name: protocol-bugfix
+description: Protocol for bug fixing. Triggers on keywords ошибка, баг, не работает, падает, error, broken, fix, bug, crash. Use when investigating any error or unexpected behavior. Enforces Fix Root Cause not Symptom via 5 Whys analysis.
+---
+
 # Protocol: Bugfix
 
 ## Context

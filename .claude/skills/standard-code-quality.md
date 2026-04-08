@@ -1,3 +1,8 @@
+---
+name: standard-code-quality
+description: Code quality standards reference — React Hooks rules, API pagination patterns, conventional commits, naming conventions. Use as reference when writing or reviewing code. Triggered by code style questions.
+---
+
 # Standard: Code Quality
 
 ---

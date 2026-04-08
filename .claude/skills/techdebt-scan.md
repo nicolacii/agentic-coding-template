@@ -1,3 +1,8 @@
+---
+name: techdebt-scan
+description: Scan codebase for technical debt — duplicates, large files, code smells, god components. Use BEFORE refactoring to identify what needs cleanup. Outputs prioritized list of debt items with effort estimates.
+---
+
 # Skill: TechDebt Scan
 
 > Поиск и документирование технического долга в кодовой базе.

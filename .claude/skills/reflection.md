@@ -1,100 +1,114 @@
+---
+name: reflection
+description: Pipeline reflection skill — runs after each completed task pipeline. Triggers automatically at stage 6 of WORKFLOW.md. Use after finishing a task with code to capture lessons, update rules, create ADRs, or generate new skills. Self-improvement enforcement: must produce at least 1 artifact (rule update, ADR, new skill, or backlog item).
+---
+
 # Skill: Pipeline Reflection
 
-> Вызывается после завершения каждого цикла migration pipeline (5 этапов).
-> Запуск: `/reflection` или автоматически после Этапа 5 (Testing).
+> Этап 6 pipeline. Self-improvement enforcement: рефлексия ОБЯЗАНА создать минимум 1 артефакт.
 
 ---
 
 ## Когда вызывать
 
-После завершения полного цикла pipeline для раздела (Task → Analysis → Implement → Review → Testing).
+После завершения этапов 1-5 pipeline (Task → Analysis → Implement → Review → Testing).
 
 ---
 
-## Процесс рефлексии
+## Процесс
 
-### Шаг 1: Собрать метрики цикла
+### Шаг 1: Собрать метрики
 
-Прочитать все артефакты завершённого цикла из `tasks/{section}/`:
-- `tasks-migrate-{section}.md` — сколько задач, сколько выполнено
-- `analysis-{section}.md` — что нашли на этапе анализа
-- `review-{section}.md` — сколько issues найдено, verdict
-- `testing-{section}.md` — coverage, тесты, verdict
+Прочитать артефакты из `tasks/{section}/`:
+- `tasks-{section}.md` — sub-tasks done/total
+- `analysis-{section}.md` — что нашли
+- `review-{section}.md` — issues, verdict
+- `testing-{section}.md` — coverage, visual diff %
 
-Собрать числа:
 ```
 Раздел: {section}
 Файлов создано: N
 Тестов: N
 Coverage: N%
-Review issues (blocking): N
-Review issues (should-fix): N
-Review verdict: APPROVED / CHANGES REQUESTED
-Iterations (review → fix → re-review): N
-Testing verdict: PASS / FAIL
+Review issues: N blocking + N should-fix
+Visual diff: N%
+Iterations: N
+Pipeline violations: N
 ```
 
-### Шаг 2: Задать 7 вопросов
+### Шаг 2: 7 вопросов
 
-Ответить на каждый честно и конкретно (не общими словами):
+1. Что сработало хорошо?
+2. Что пошло не так?
+3. Были ли пропущены этапы? Почему?
+4. Качество анализа — нашёл ли реальные проблемы?
+5. Качество ревью — нашёл ли реальные баги?
+6. Качество тестов — покрыли реальные сценарии?
+7. **Что нужно изменить в процессе?** ← обязан указать конкретный артефакт
 
-1. **Что сработало хорошо?** — Какие этапы дали максимум ценности? Что бы повторили?
-2. **Что пошло не так?** — Какие этапы были пропущены, затянулись, дали плохой результат?
-3. **Были ли пропущены этапы?** — Если да, почему? Что это сломало?
-4. **Качество анализа:** Нашёл ли Analysis этап реальные проблемы? Были ли сюрпризы на этапе Implementation, которые Analysis должен был найти?
-5. **Качество ревью:** Нашёл ли Review реальные баги? Или только стилистические замечания? Были ли false positives?
-6. **Качество тестов:** Покрыли ли тесты реальные user scenarios? Были ли gaps в coverage? Нашли ли тесты баги?
-7. **Что нужно изменить в процессе?** — Конкретные правки в WORKFLOW.md, CLAUDE.md, или шаблоны.
-
-### Шаг 3: Записать рефлексию
-
-Создать файл `tasks/{section}/reflection.md`:
+### Шаг 3: Записать reflection.md
 
 ```markdown
 # Reflection: {Section}
-
-> Дата: {date}
-> Pipeline cycle: Task → Analysis → Implement → Review → Testing
+> Дата: YYYY-MM-DD
 
 ## Метрики
-{таблица из Шага 1}
+{таблица}
 
 ## 7 вопросов
-{ответы из Шага 2}
+{ответы конкретно}
 
-## Выводы
-{3-5 конкретных выводов}
+## Action Items (обязательно ≥1)
+- [ ] {action} → {target file}
 
-## Действия
-{конкретные правки, которые нужно внести}
+## Self-improvement artifacts created
+- [ ] memory/feedback_*.md
+- [ ] core-rules.md update
+- [ ] WORKFLOW.md update
+- [ ] docs/adr/ADR-XXX.md (NEW)
+- [ ] .claude/skills/{new-skill}.md (NEW)
+- [ ] tasks/improvements.md
+- [ ] CHANGELOG.md
 ```
 
-### Шаг 4: Внести правки
+### Шаг 4: ENFORCEMENT — создать минимум 1 артефакт
 
-На основе выводов обновить **файлы ТЕКУЩЕГО проекта** (не корневые):
+**Правило:** рефлексия НЕ завершена пока не создан хотя бы один из:
 
-1. **{project}/WORKFLOW.md** — если нужно изменить процесс (добавить шаг, убрать шаг, изменить правила)
-2. **{project}/CLAUDE.md** — если нужно добавить/изменить правила разработки для ЭТОГО проекта
-3. **{project}/WORKFLOW.md → Lessons Learned** — добавить запись с датой и кратким описанием
+| Артефакт | Когда создавать |
+|----------|----------------|
+| `memory/feedback_*.md` | Lesson о поведении агента (повторяющаяся ошибка) |
+| `core-rules.md` update | Lesson о процессе (новое правило) |
+| `WORKFLOW.md` update | Изменение pipeline |
+| `docs/adr/ADR-XXX.md` | Архитектурное решение принято |
+| `.claude/skills/{new}.md` | Паттерн повторился 3+ раз → новый skill |
+| `tasks/improvements.md` | Идея для backlog |
+| `CHANGELOG.md` | Изменение для пользователя |
 
-**ВАЖНО:** Корневой `CLAUDE.md` (шаблон) НЕ трогать. Правки вносятся только в CLAUDE.md конкретного проекта.
+**Если задача прошла идеально и нечего улучшать** — добавить запись в `tasks/reflection-history.md` с пометкой `No improvements needed` и обоснованием. Это тоже артефакт.
 
-### Шаг 5: Обновить history
-
-Дописать в `tasks/reflection-history.md` (создать если нет):
+### Шаг 5: Обновить reflection-history.md
 
 ```markdown
-| Дата | Раздел | Issues found | Iterations | Key lesson |
-|------|--------|-------------|------------|------------|
-| {date} | {section} | N blocking + N should-fix | N | {one sentence} |
+| Дата | Раздел | Issues | Iterations | Key lesson | Artifacts created |
+|------|--------|--------|------------|-----------| -------------------|
+| YYYY-MM-DD | {section} | N | N | {one line} | ADR-XXX, skill-XXX |
 ```
+
+### Шаг 6: Если паттерн повторился 3+ раз → создать новый skill
+
+Если в reflection-history.md одна и та же ошибка появляется 3+ раз:
+1. Создать новый skill в `.claude/skills/{name}.md`
+2. Добавить frontmatter с triggers
+3. Обновить `core-rules.md` — добавить точку вызова
+4. Записать в reflection.md что создан новый skill
 
 ---
 
-## Правила рефлексии
+## Правила
 
-- **Честность важнее позитива.** Если этап был бесполезен — так и написать.
-- **Конкретика важнее абстракций.** "BundleCard.tsx:72 не покрыт тестами" > "нужно больше тестов".
-- **Каждый вывод → действие.** Если вывод не приводит к конкретному изменению — он бесполезен.
-- **Не дублировать.** Если проблема уже описана в предыдущей рефлексии и исправлена — не повторять.
-- **Рефлексия — не формальность.** Если цикл прошёл идеально — написать "всё хорошо" и не выдумывать проблемы.
+- **Честность важнее позитива** — если этап был бесполезен, так и пиши
+- **Конкретика важнее абстракций** — "file.tsx:42 не покрыт" > "нужно больше тестов"
+- **Каждый вывод → действие** — без действия вывод бесполезен
+- **Не дублировать** — если проблема уже зафиксирована, не повторять
+- **Self-improvement enforcement** — без минимум 1 артефакта рефлексия НЕ завершена

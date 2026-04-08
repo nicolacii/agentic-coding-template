@@ -1,3 +1,8 @@
+---
+name: review
+description: Code review skill — structured review with architecture, code quality, tests, accessibility, security checks. Used at stage 4 of WORKFLOW pipeline OR standalone. Outputs review-{section}.md with verdict APPROVED or CHANGES REQUESTED. Triggers on review request, before merge, or after implementation.
+---
+
 # Skill: Interactive Code Review
 
 > Структурированный code review с options и рекомендациями. Для standalone использования вне pipeline.

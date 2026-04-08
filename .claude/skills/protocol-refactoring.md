@@ -1,3 +1,8 @@
+---
+name: protocol-refactoring
+description: Protocol for code refactoring and optimization. Triggers on keywords рефакторинг, улучшить код, оптимизировать, refactor, clean up, extract, split component. Enforces Change Structure Not Behavior — tests MUST exist before refactoring, run after each change.
+---
+
 # Protocol: Refactoring
 
 ## Context

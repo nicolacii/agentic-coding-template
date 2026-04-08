@@ -1,3 +1,8 @@
+---
+name: protocol-prepare-prompt
+description: Prompt preparation skill for STANDARD/COMPLEX tasks. Use to extract literal constraints from user request before any work. Outputs Goal, Constraints (as direct quotes), and Protocol selection. Prevents agent from making assumptions or interpretations.
+---
+
 # Protocol: Prepare Prompt
 
 ## Context

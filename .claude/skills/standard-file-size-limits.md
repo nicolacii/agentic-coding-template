@@ -1,3 +1,8 @@
+---
+name: standard-file-size-limits
+description: File size limits standard — soft and hard limits for components, services, types, and a 6-step splitting procedure when files grow too large. Use when files approach limits or for refactoring planning.
+---
+
 # Standard: File Size Limits
 
 ## Context

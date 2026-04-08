@@ -1,3 +1,8 @@
+---
+name: protocol-freeze-recovery
+description: Protocol for recovery when AI agent is stuck, looping, or repeating same failed action. Triggers when same error happens 3+ times, infinite loop detected, or user says застрял, зависание, freeze, stuck, looping. Enforces Understand Before Retry.
+---
+
 # Protocol: Freeze Recovery
 
 > Когда AI завис, зациклился, не отвечает. Принцип: UNDERSTAND BEFORE RETRY.

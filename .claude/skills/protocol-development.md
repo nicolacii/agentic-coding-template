@@ -1,3 +1,8 @@
+---
+name: protocol-development
+description: Protocol for new features and enhancements. Triggers on keywords добавить, создать, новая фича, разработать, implement, build, create new, add feature. Use BEFORE writing any code for new functionality. Includes Duplicate Check, JTBD Analysis, and TDD (Phase 0-4).
+---
+
 # Protocol: Development
 
 ## Context

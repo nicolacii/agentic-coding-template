@@ -1,3 +1,8 @@
+---
+name: fix-last-task
+description: Fix the last completed task after bugs or missing requirements are found. Use when user reports issue with previously "done" task. Re-analyzes what was missed, fixes the issue, updates the task artifacts and reflection.
+---
+
 # Skill: Fix Last Task
 
 > Анализ и доработка последней задачи после обнаружения ошибок/недоработок.

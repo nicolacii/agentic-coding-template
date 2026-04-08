@@ -1,3 +1,8 @@
+---
+name: standard-agent-quality
+description: Agent and QA quality metrics — success criteria for AI agent work, QA checklists, definition of done. Use to evaluate if a task is truly complete or if quality is acceptable.
+---
+
 # Standard: Agent & QA Quality
 
 ---

@@ -1,7 +1,18 @@
-# Core Rules v5.1
+# Core Rules v5.2
 
 > Always-loaded. Каждый ответ Claude Code следует этой структуре.
 > Skills из `.claude/skills/` загружаются on-demand в точках, указанных ниже.
+
+## Memory entrypoints (читать при необходимости)
+
+| Файл | Назначение | Когда читать |
+|------|-----------|-------------|
+| `PROJECT_KNOWLEDGE.md` | Главная точка входа памяти | Начало сессии (`/start`) |
+| `BACKLOG.md` | Реестр задач + приоритеты + история | Перед взятием новой задачи |
+| `CHANGELOG.md` | История изменений | Перед merge или release |
+| `docs/adr/` | Архитектурные решения | При архитектурных вопросах |
+| `tasks/improvements.md` | Backlog улучшений | Перед `/backlog-to-rules` |
+| `tasks/reflection-history.md` | История рефлексий + lessons | Для поиска повторяющихся проблем |
 
 ---
 
@@ -110,19 +121,29 @@ Goal: [результат]  Constraints: [ЦИТАТЫ из запроса]  Pro
 | Анализ UI/UX | `/evaluate-jobs` — JTBD анализ |
 | Ошибка в "done" | `/fix-last-task` — исправление |
 
-## Рефлексия → Правила (КЛЮЧЕВОЙ ЦИКЛ)
+## Self-Improvement Loop (КРИТИЧЕСКИЙ ЦИКЛ)
 
-После `/reflection` (этап 6 pipeline) ОБЯЗАТЕЛЬНО обновить:
-```
-Lesson о поведении агента  → memory/feedback_*.md
-Lesson о процессе          → core-rules.md или WORKFLOW.md
-Предложение по продукту    → tasks/improvements.md
-Факт о проекте             → RESEARCH.md
-Новый чеклист-пункт        → tasks/checklists/implementation-checklist.md
-```
-Без обновления хотя бы одного файла — рефлексия НЕ завершена, DONE ЗАБЛОКИРОВАН.
+**Принцип:** рефлексия БЕЗ изменения системы — это просто журнал. Каждая рефлексия ОБЯЗАНА produce минимум 1 артефакт self-improvement.
 
-Когда накопилось 5+ items в improvements.md → `/backlog-to-rules` (внедрить в правила).
+После `/reflection` (этап 6 pipeline) ОБЯЗАТЕЛЬНО создать минимум 1 артефакт:
+
+| Тип lesson | Артефакт |
+|-----------|----------|
+| Lesson о поведении агента (повторяющаяся ошибка) | `memory/feedback_*.md` |
+| Lesson о процессе (новое правило) | `core-rules.md` или `WORKFLOW.md` update |
+| **Архитектурное решение** | `docs/adr/ADR-XXX-{title}.md` (НОВЫЙ файл) |
+| **Паттерн повторился 3+ раз** | `.claude/skills/{new-skill}.md` (НОВЫЙ файл) |
+| Идея для backlog | `tasks/improvements.md` |
+| Изменение для пользователя | `CHANGELOG.md` |
+| Факт о проекте | `RESEARCH.md` или `PROJECT_KNOWLEDGE.md` |
+
+**Если задача прошла идеально и нечего улучшать** — записать это явно в `tasks/reflection-history.md` с пометкой `No improvements needed` и обоснованием. Это тоже считается артефактом.
+
+**Без артефакта** — рефлексия НЕ завершена, DONE ЗАБЛОКИРОВАН, задача НЕ закрыта.
+
+Когда накопилось 5+ items в `improvements.md` → запустить `/backlog-to-rules` (внедрить в правила).
+
+Когда одна и та же ошибка появляется в `reflection-history.md` 3+ раз → создать новый skill в `.claude/skills/`.
 
 ---
 

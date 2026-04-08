@@ -1,3 +1,8 @@
+---
+name: session-end
+description: Session completion skill. Use at the end of every work session to update memory, log errors, score quality (1-10), and prepare next session hypothesis. Updates BACKLOG.md statuses and CHANGELOG.md if applicable.
+---
+
 # Skill: Session End
 
 > Завершение рабочей сессии. Обновляет memory, логирует ошибки, оценивает качество.
