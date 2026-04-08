@@ -26,16 +26,16 @@
 
 ```bash
 # 1. Скопировать в свой проект
-cp -r claude-code-framework/.claude /path/to/your/project/
-cp -r claude-code-framework/scripts /path/to/your/project/
-cp -r claude-code-framework/tasks /path/to/your/project/
-cp -r claude-code-framework/templates /path/to/your/project/
-cp -r claude-code-framework/docs /path/to/your/project/
-cp claude-code-framework/CLAUDE.md /path/to/your/project/
-cp claude-code-framework/WORKFLOW.md /path/to/your/project/
-cp claude-code-framework/BACKLOG.md /path/to/your/project/
-cp claude-code-framework/CHANGELOG.md /path/to/your/project/
-cp claude-code-framework/PROJECT_KNOWLEDGE.md /path/to/your/project/
+cp -r agentic-coding-template/.claude /path/to/your/project/
+cp -r agentic-coding-template/scripts /path/to/your/project/
+cp -r agentic-coding-template/tasks /path/to/your/project/
+cp -r agentic-coding-template/templates /path/to/your/project/
+cp -r agentic-coding-template/docs /path/to/your/project/
+cp agentic-coding-template/CLAUDE.md /path/to/your/project/
+cp agentic-coding-template/WORKFLOW.md /path/to/your/project/
+cp agentic-coding-template/BACKLOG.md /path/to/your/project/
+cp agentic-coding-template/CHANGELOG.md /path/to/your/project/
+cp agentic-coding-template/PROJECT_KNOWLEDGE.md /path/to/your/project/
 
 # 2. Заполнить PROJECT_KNOWLEDGE.md — описание проекта, стек, конвенции
 
