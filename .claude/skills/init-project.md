@@ -175,6 +175,74 @@ Architecture (опционально):
 
 ---
 
+### Шаг 7: RESEARCH.md — Persistent Project Encyclopedia (MANDATORY)
+
+**Цель:** создать `RESEARCH.md` в корне проекта — deep-dive encyclopedia, которая отвечает на "как оно устроено" и "почему так". Читается агентом перед первой задачей в сессии. Без этого файла ни одна задача не может быть взята в работу.
+
+**Подход зависит от `project.type`:**
+
+#### Type = `greenfield` (новый проект с нуля)
+
+RESEARCH.md создаётся из шаблона `templates/research-template.md` с пустыми секциями. Заполняется incrementally в рамках этапа 2 (Analysis) каждой задачи — каждая фича дописывает свою секцию `Phase N`.
+
+```
+Action: cp templates/research-template.md RESEARCH.md
+Then: заполнить Phase 0 (Project Overview) — описание проекта, status, deployment
+```
+
+#### Type = `maintenance` или `library` (существующий код)
+
+RESEARCH.md генерируется через **deep analysis session** — прочитать все основные файлы проекта целиком (не grep!), записать находки. Это отдельный phase, занимает время, но **окупается** на первой же задаче.
+
+Процесс:
+1. **Inventory:** `find . -type f -name "*.py" -o -name "*.ts" -o -name "*.tsx"` (or equivalent) — список основных файлов с LOC
+2. **Read in full** каждый файл > 50 LOC (не grep, не первые 100 строк — полностью)
+3. **Записать в RESEARCH.md** по структуре шаблона:
+   - Phase 0: Project Overview — что это, deployment, sizes
+   - Phase 1: Architecture — модули, импорты, data flow для типичного запроса
+   - Phase 2-N: по доменам проекта (API, persistence, UI, security, и т.д.)
+   - Phase final: Quirks / Gotchas / Technical Debt — то, на что легко наступить
+4. **Environment vars** — полная таблица из `os.environ.get(...)` / `process.env.*`
+5. **Known accepted risks** — таблица с likelihood/impact/rationale
+
+**Размер:** целевой 400-1500 строк для среднего проекта. Если > 2000 — разбить на RESEARCH-submodule.md с оглавлением в главном.
+
+#### Type = `migration`
+
+Для migration-проектов RESEARCH.md — это **encyclopedia старого проекта**. Каждая analyst-stage каждой задачи ОБЯЗАНА дописать новую секцию `Phase N` (см. WORKFLOW.md Stage 2, hard rule). Этот режим уже работает, init-project просто создаёт skeleton с правильной структурой логи.
+
+#### Type = `content` (документация)
+
+RESEARCH.md может быть lightweight — общее описание структуры и стилей, без deep-dive в код.
+
+---
+
+### Шаг 8: Welcome message + next steps
+
+После завершения всех шагов показать пользователю:
+
+```
+✅ Framework initialized for {project name}
+
+Created files:
+  - .claude/project-config.yml
+  - PROJECT_KNOWLEDGE.md
+  - RESEARCH.md ({type}-mode skeleton OR deep-analysis draft)
+  - .claude/sub-agents/*.md ({N} roles from {preset} preset)
+  - BACKLOG.md (empty sprint, status legend)
+  - CHANGELOG.md (Unreleased section)
+
+Next steps:
+  1. Review RESEARCH.md — add anything important that deep-analysis missed
+  2. Populate BACKLOG.md with initial tasks
+  3. First task will follow the full pipeline (see WORKFLOW.md)
+
+Hard rule: read RESEARCH.md before starting any task. If it's empty or
+stale, do a deep analysis first before coding.
+```
+
+---
+
 ## Output
 
 Создаёт следующие файлы:
@@ -230,7 +298,13 @@ Generated from templates in `templates/sub-agent-templates/`.
 
 ### 4. `BACKLOG.md` initialized
 
-### 5. Welcome message с next steps
+### 5. **`RESEARCH.md` — MANDATORY** (новое, 2026-04-09)
+
+Создаётся по шаблону `templates/research-template.md`. Для `type=greenfield` — пустой skeleton с Phase 0 заполненной. Для `type=maintenance`/`library` — **обязательная deep analysis session** прежде чем agent возьмёт первую задачу: читать все основные файлы целиком, записывать находки в Phase 0-N + Quirks/Gotchas.
+
+**Без этого файла** core-rules.md блокирует первую задачу в проекте. Hard rule.
+
+### 6. Welcome message с next steps
 
 ---
 

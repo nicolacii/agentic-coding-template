@@ -73,3 +73,18 @@ reference:
 custom_skills:
   # Project-specific skills (in addition to .claude/skills/)
   # - path/to/custom-skill.md
+
+# Persistent project knowledge
+# Hard rule from core-rules.md: read RESEARCH.md before first task in any session.
+# Created by /init-project step 7 (see .claude/skills/init-project.md).
+research_md:
+  required: true
+  path: "RESEARCH.md"
+  # Initialization strategy depends on project.type:
+  #   greenfield   → copy templates/research-template.md, fill Phase 0
+  #   maintenance  → DEEP ANALYSIS session (read all main files in full,
+  #                  write findings to RESEARCH.md before first task)
+  #   library      → DEEP ANALYSIS session, focus on public API + contracts
+  #   migration    → skeleton + fill incrementally per WORKFLOW.md Stage 2
+  #                  (see "HARD RULE: каждый Stage 2 дописывает секцию")
+  #   content      → lightweight, free-form

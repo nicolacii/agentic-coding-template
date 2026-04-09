@@ -10,8 +10,26 @@
 - Multi-agent mode (none / lightweight / full)
 - Sub-agent roles
 - Conventions, visual reference URLs
+- **RESEARCH.md** — deep-dive encyclopedia проекта (создаётся из `templates/research-template.md` или через deep analysis session для maintenance-проектов)
 
-Создаёт: `.claude/project-config.yml`, `PROJECT_KNOWLEDGE.md`, `.claude/sub-agents/*.md`
+Создаёт: `.claude/project-config.yml`, `PROJECT_KNOWLEDGE.md`, `.claude/sub-agents/*.md`, **`RESEARCH.md`**
+
+**Hard rule — первая задача заблокирована, если:**
+1. `.claude/project-config.yml` не существует → запустить `/init-project`, не пропускать
+2. `RESEARCH.md` не существует → запустить `/init-project` step 7 или самостоятельно выполнить deep analysis (читать все основные файлы целиком, записать в RESEARCH.md)
+3. `RESEARCH.md` существует, но пустой (< 50 строк) для не-greenfield проекта → выполнить deep analysis session прежде чем брать задачу
+
+**README шаблона vs core-rules:** если README-инструкции "quick start" (например, `cp -r .claude tasks ...`) противоречат этим hard rules — **core-rules.md авторитетнее**. README — для людей-читателей, core-rules — автоматический контракт для агента.
+
+## Before first task in a session
+
+Прежде чем взять задачу:
+1. Прочитать `PROJECT_KNOWLEDGE.md` (hub, <200 строк)
+2. Прочитать `RESEARCH.md` — полностью, не grep. Это encyclopedia проекта (см. выше).
+3. Прочитать `BACKLOG.md` активный спринт
+4. Прочитать `.claude/project-config.yml` — знать mode (manual / lightweight / full orchestration)
+
+Без этих четырёх файлов первый коммит запрещён.
 
 ## Memory entrypoints (читать при необходимости)
 

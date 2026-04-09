@@ -54,13 +54,13 @@ git checkout -b feat/error-pages
 **Выход:**
 - Manual: `tasks/{section}/analysis-{section}.md`
 - Orchestrated: `tasks/{section}/analyst-architect.md` + `analyst-*.md` файлы
-- **MANDATORY для migration projects:** дописать новую секцию в `RESEARCH.md`
+- **MANDATORY для всех project types:** дописать новую секцию в `RESEARCH.md`
 
-### 🔴 HARD RULE для migration projects: дописывать в RESEARCH.md
+### 🔴 HARD RULE: каждый Stage 2 дописывает секцию в RESEARCH.md
 
-**Если проект — migration** (`reference.legacy.path` set in `.claude/project-config.yml`):
+**Применяется ко всем типам проектов** (greenfield, maintenance, library, migration, content). Различается только структура и частота обновления. См. расширение правила ниже.
 
-Каждый analyst Stage 2 ОБЯЗАН написать находки про legacy НЕ ТОЛЬКО в свой output файл (`analyst-*.md`), но и **дописать секцию в `RESEARCH.md`** на корне проекта. Структура секции:
+**Структура секции — migration-вариант (оригинальный, наиболее детальный):**
 
 ```
 ## Phase N: {Section Name} (YYYY-MM-DD)
@@ -87,18 +87,59 @@ git checkout -b feat/error-pages
 - Legacy hacks, технический долг, что НЕ воспроизводить
 ```
 
-И обновить **Лог исследований** таблицу в начале RESEARCH.md.
+**Структура секции — greenfield / maintenance / library вариант:**
 
-**Зачем:** RESEARCH.md — это persistent encyclopedia старого проекта, переиспользуется во всех итерациях миграции (в т.ч. если эта итерация будет признана неудачной и переписана). Без записи в RESEARCH.md ценные данные остаются только в `tasks/{section}/analyst-*.md` который привязан к конкретной попытке миграции и теряется при rewrite.
+```
+## Phase N: {Task Name} (YYYY-MM-DD)
 
-**Lesson task 10.0 Billing 2026-04-08:** analyst-architect собрал ~700 строк деталей про legacy billing, но они остались только в `tasks/billing/analyst-architect.md`. Пользователь явно просил единый файл-энциклопедию для случая если проект придётся переписать → теперь hard rule.
+### N.1 What was added/changed
+- Новые модули / функции / endpoints (с LOC и ссылками на файлы)
+- Изменения в существующих модулях
 
-**Verification:** перед закрытием Stage 2 orchestrator ОБЯЗАН проверить:
+### N.2 New contracts
+- API endpoints (request/response shape)
+- Function signatures для public API
+- Data structures / types
+
+### N.3 Data flow changes
+- Как новый код вписывается в общий flow (обновить/расширить Phase 1 диаграмму при необходимости)
+
+### N.4 Quirks / Gotchas introduced
+- Non-obvious behavior
+- Edge cases и accepted risks
+- Dependencies на других модулях, которые не обязательны к соблюдению
+- Новые environment variables
+
+### N.5 Tech debt or follow-ups
+- Что оставлено недоделанным
+- Что нужно учесть в следующих задачах
+```
+
+**Структура секции — content (документация) вариант:** легковесная — просто список изменений в секции "Recent updates" в начале RESEARCH.md, без обязательных подсекций.
+
+И обновить **Лог исследований** таблицу в начале RESEARCH.md (дата, секция, повод, автор).
+
+**Зачем для всех типов:**
+
+- **Migration:** persistent encyclopedia старого проекта, переживает итерации переписывания (исходный use case).
+- **Maintenance:** capture tribal knowledge, которое иначе теряется в commit messages. Новый разработчик (или AI агент в новой сессии) начинает с полного контекста вместо reverse-engineering из кода.
+- **Greenfield:** инвариант "как оно было задумано" который сохраняется даже после множества рефакторингов. Записывается с первой фичи, а не "когда-нибудь".
+- **Library:** API surface, breaking changes, invariants для внешних пользователей.
+
+**Lessons:**
+- **Task 10.0 Billing (partners-portal, 2026-04-08):** analyst-architect собрал ~700 строк деталей про legacy billing, но они остались только в `tasks/billing/analyst-architect.md`. Правило добавлено для migration.
+- **DL-001 Download CSV (analytics-agent, 2026-04-09):** framework развернули без `/init-project`, RESEARCH.md не появился, работа пошла с неполным контекстом (например, quirks типа `_sanitize_messages` или double-charset в send_file выяснились во время работы). Правило расширено с migration-only на все project types.
+
+**Verification:** перед закрытием Stage 2 agent (или orchestrator) ОБЯЗАН проверить:
 ```
 [ ] RESEARCH.md содержит новую "Phase N" секцию по этой задаче
 [ ] Лог исследований обновлён
-[ ] Минимум: API endpoints + state shape + data flows + routes
+[ ] Для migration: API endpoints + state shape + data flows + routes
+[ ] Для maintenance/greenfield: new contracts + data flow changes + quirks
+[ ] Для library: API surface changes + breaking/non-breaking markers
 ```
+
+**Исключение:** lightweight tasks (S-size, < 30 строк кода, без architectural impact) могут пропустить запись в RESEARCH.md если рефлексия явно подтверждает "nothing architecturally new". Записать в `tasks/reflection-history.md` строку с `Skipped RESEARCH.md update: trivial`.
 
 ### Auto-orchestration (для COMPLEX с `multi_agent.enabled: true`)
 
@@ -118,7 +159,7 @@ Task("analyst-architect") + Task("analyst-fe-senior")  # parallel
 **Анализ кода:** component assessment, code smells, decomposition
 
 **Если задача архитектурная** → создать **ADR** в `docs/adr/` (см. ADR template).
-**Если migration project** → ОБЯЗАТЕЛЬНО дописать Phase N в `RESEARCH.md` (см. Hard Rule выше).
+**Для ВСЕХ project types** → ОБЯЗАТЕЛЬНО дописать Phase N в `RESEARCH.md` (см. Hard Rule выше). Исключение: trivial S-tasks без architectural impact (записать skip-причину в `tasks/reflection-history.md`).
 
 ---
 
