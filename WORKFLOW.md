@@ -54,6 +54,51 @@ git checkout -b feat/error-pages
 **Выход:**
 - Manual: `tasks/{section}/analysis-{section}.md`
 - Orchestrated: `tasks/{section}/analyst-architect.md` + `analyst-*.md` файлы
+- **MANDATORY для migration projects:** дописать новую секцию в `RESEARCH.md`
+
+### 🔴 HARD RULE для migration projects: дописывать в RESEARCH.md
+
+**Если проект — migration** (`reference.legacy.path` set in `.claude/project-config.yml`):
+
+Каждый analyst Stage 2 ОБЯЗАН написать находки про legacy НЕ ТОЛЬКО в свой output файл (`analyst-*.md`), но и **дописать секцию в `RESEARCH.md`** на корне проекта. Структура секции:
+
+```
+## Phase N: {Section Name} (YYYY-MM-DD)
+
+### N.1 Architecture
+- Файлы: список с LOC
+- Cross-module dependencies (что модуль читает извне)
+- Routes (URLs из legacy paths.ts)
+
+### N.2 API Endpoints
+- Полная таблица: # | endpoint | method | request | response | notes
+- TypeScript contracts (interface/type definitions)
+
+### N.3 State Shape
+- Legacy Redux slice (если есть)
+- Selectors / hooks
+- User profile fields consumed
+
+### N.4 Data Flows
+- Каждая бизнес-операция: trigger → API → store/cache → component
+
+### N.5 Risks / Quirks
+- Race conditions, security, performance, edge cases
+- Legacy hacks, технический долг, что НЕ воспроизводить
+```
+
+И обновить **Лог исследований** таблицу в начале RESEARCH.md.
+
+**Зачем:** RESEARCH.md — это persistent encyclopedia старого проекта, переиспользуется во всех итерациях миграции (в т.ч. если эта итерация будет признана неудачной и переписана). Без записи в RESEARCH.md ценные данные остаются только в `tasks/{section}/analyst-*.md` который привязан к конкретной попытке миграции и теряется при rewrite.
+
+**Lesson task 10.0 Billing 2026-04-08:** analyst-architect собрал ~700 строк деталей про legacy billing, но они остались только в `tasks/billing/analyst-architect.md`. Пользователь явно просил единый файл-энциклопедию для случая если проект придётся переписать → теперь hard rule.
+
+**Verification:** перед закрытием Stage 2 orchestrator ОБЯЗАН проверить:
+```
+[ ] RESEARCH.md содержит новую "Phase N" секцию по этой задаче
+[ ] Лог исследований обновлён
+[ ] Минимум: API endpoints + state shape + data flows + routes
+```
 
 ### Auto-orchestration (для COMPLEX с `multi_agent.enabled: true`)
 
@@ -64,7 +109,8 @@ Task("analyst-architect") + Task("analyst-fe-senior")  # parallel
 
 После завершения:
 1. Orchestrator читает output файлы
-2. Aggregates → `tasks/{section}/implementation-plan.md`
+2. **MANDATORY:** orchestrator (или analyst-architect) дописывает Phase N в RESEARCH.md
+3. Aggregates → `tasks/{section}/implementation-plan.md`
 
 ### Manual mode
 
@@ -72,6 +118,7 @@ Task("analyst-architect") + Task("analyst-fe-senior")  # parallel
 **Анализ кода:** component assessment, code smells, decomposition
 
 **Если задача архитектурная** → создать **ADR** в `docs/adr/` (см. ADR template).
+**Если migration project** → ОБЯЗАТЕЛЬНО дописать Phase N в `RESEARCH.md` (см. Hard Rule выше).
 
 ---
 
@@ -140,6 +187,33 @@ Task("reviewer-architect") + Task("reviewer-fe-senior")  # parallel
 
 **Выход:** `tasks/{section}/testing-{section}.md` ИЛИ `qa-results.md`
 
+### Что Stage 5 проверяет (regression scope)
+
+Stage 5 — это **полный regression**, не только новые тесты:
+
+```bash
+npx tsc --noEmit          # вся кодовая база (а не только новые файлы)
+npx vitest run            # ВСЕ тесты, не только новые — это и есть regression suite
+npx vite build            # production билд всей сборки
+python3 scripts/visual-diff.py {page}  # для CSS/UI работы
+```
+
+Если новый код сломал существующие фичи — `vitest run` это поймает. Это автоматическая регрессия.
+
+### Visual-diff — MANDATORY для migration projects (HARD RULE с 2026-04-08)
+
+**Если проект — migration с легаси reference (см. `.claude/project-config.yml` → `reference.legacy.path`):**
+
+Visual-diff ОБЯЗАТЕЛЕН для каждой новой страницы перед мержем. Это HARD acceptance gate, не optional.
+
+```
+[ ] Каждая новая страница миграции прошла visual-diff < 1% против legacy production
+[ ] Если diff > 1% → итерировать SCSS пока не пройдёт, ЛИБО explicitly defer в visual debt с записью в BACKLOG.md
+[ ] "Skipped because no reference" — НЕ валидное основание. Reference = legacy production URL.
+```
+
+**Lesson (task 10.0 Billing 2026-04-08):** visual-diff был skipped в QA stage (sub-agent не имел Bash, orchestrator забыл re-run), 5 страниц замержились с diff 2.82-27.12% от legacy. Premature merge пойман только пост-фактум по жалобе пользователя. Это структурный fail enforcement → теперь hard rule.
+
 ### Auto-orchestration (для COMPLEX)
 
 Orchestrator АВТОМАТИЧЕСКИ spawn qa:
@@ -148,15 +222,16 @@ Task("qa") → runs tsc, vitest, build, visual-diff
 ```
 
 QA sub-agent итерирует visual-diff пока < 1%.
+**Если QA sub-agent не имеет Bash доступа** → orchestrator ОБЯЗАН re-run static checks И visual-diff сам перед commit. См. `/orchestrate` Circuit Breaker → QA Bash requirement.
 
 ### Manual mode
 
 ```
 [ ] TypeScript: 0 errors
-[ ] Tests: all pass
+[ ] Tests: all pass (full suite — это regression)
 [ ] Coverage: > 70% для новых файлов
 [ ] Build: success
-[ ] Visual diff: < 1% (если CSS)
+[ ] Visual diff: < 1% (если CSS И ЕСТЬ legacy reference) — MANDATORY для migration
 ```
 
 ---

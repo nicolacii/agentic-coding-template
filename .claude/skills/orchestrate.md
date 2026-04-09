@@ -203,3 +203,67 @@ Reflection требует памяти всех этапов — не делег
 1. Перезапустить sub-agent с уточнённым brief
 2. Сделать работу самостоятельно (если контекст позволяет)
 3. Запросить помощь у пользователя
+
+---
+
+## Circuit Breaker (валидировано task 10.0 Billing, 2026-04-08)
+
+После ЛЮБОГО отказа sub-agent (529, error, timeout, partial output):
+
+1. **Проверить артефакты.** Если ≥ 50% ожидаемых файлов созданы → orchestrator доделывает остаток в-context (fallback mode). СТОП retry.
+2. Если < 50% создано → ОДИН retry с тем же brief.
+3. Если retry тоже падает → переключить model на Sonnet → ОДИН ещё retry.
+4. Если опять падает → orchestrator делает работу в-context. Документировать в output файле как "Completed via fallback after N sub-agent failures".
+
+**ЗАПРЕЩЕНО:**
+- Retry слепо больше 2 раз
+- Переключать model на первой ошибке (может быть transient)
+- Молча скипать — всегда документировать fallback в output файле этапа
+
+**Эмпирика task 10.0:** Opus developer-api упал 3 раза подряд с 529 (41 сек / 152 сек / partial 40%). Третья попытка дала 40% артефактов — orchestrator доделал остаток за 3 минуты в context, результат неотличим от sub-agent output по стилю. Ретроспективно правильный путь был "1 retry → fallback после 2-х падений", сэкономили бы ~5 минут.
+
+---
+
+## Health Checks during background sub-agent runs
+
+Для любого sub-agent с ожидаемым временем > 3 минут:
+
+1. **После spawn:** запомнить agent ID и путь к expected output файлу
+2. **Каждые 2-3 минуты** проверять прогресс через:
+   - `ls -la <expected-artifact>` (proxy для "что-то происходит?")
+   - `tail -c 4000 <agent-stream-file> | grep -oE '"name":"[^"]+"|"command":"...'` (последние tool calls)
+3. **Reporting в чат** одной строкой: "Stage X / 7 — agent created Y files, last action: Z, elapsed: T min"
+4. **Если 3+ минуты zero progress** → likely hung. Сообщить пользователю. Предложить kill+retry vs continue waiting.
+
+**ЗАПРЕЩЕНО:** fire-and-forget на длинном sub-agent без report'а прогресса. Молчание = плохой UX, пользователь не понимает идёт ли работа или зависло.
+
+**Эмпирика:** на task 10.0 пользователь явно жаловался на silence. Внедрено мid-run, применено к последующим sub-agents. Сэкономило раздражение.
+
+---
+
+## Model Selection для sub-agents
+
+| Sub-agent role | Model | Когда |
+|----------------|-------|-------|
+| analyst-* | **Opus** | Глубокий анализ, ambiguous decisions |
+| developer-types | **Sonnet** | Mechanical type porting |
+| developer-api (типовые) | **Sonnet** | Established patterns |
+| developer-ui (large) | **Sonnet** | Эмпирически 2-4× быстрее, 0 vs 4 errors |
+| developer-* (novel arch) | **Opus** | State design, новые паттерны |
+| reviewer-* | **Sonnet** | Rule checking |
+| qa | **Sonnet** | Running checks |
+
+**Эмпирика task 10.0 Billing:**
+- Opus: 9 мин analyst, 3 ЧАСА developer-ui, 4× API 529 errors
+- Sonnet: 4-5 мин reviewer, 2.7 мин qa, 0× API 529 errors
+
+Default — Sonnet. Opus только когда нужна глубина рассуждений.
+
+---
+
+## QA sub-agent — Bash requirement
+
+QA role фундаментально требует shell access (`tsc --noEmit`, `vitest run`, `vite build`, `python3 visual-diff.py`). Если sub-agent sandbox блокирует Bash:
+1. QA должен явно declare этот failure в output
+2. Orchestrator обязан re-run static checks сам (быстро, ~30 сек)
+3. Update qa.md role file: "MUST verify Bash availability in setup, fail loudly if not"

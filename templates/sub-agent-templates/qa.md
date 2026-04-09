@@ -8,11 +8,33 @@ output: tasks/{section}/qa-results.md
 
 You run all automated checks and report results.
 
+## ⚠️ Bash requirement (CRITICAL)
+
+This role requires shell access to run `tsc`, test runner, build, visual-diff. **Verify Bash is available BEFORE starting work.**
+
+If Bash is denied in your sandbox:
+1. Write `STATUS: BLOCKED — Bash unavailable` at top of `qa-results.md`
+2. List exactly which checks could not be run
+3. Return immediately to orchestrator
+4. Orchestrator MUST run the static checks AND visual-diff itself before commit. Do not silently skip.
+
+## Visual-diff enforcement (HARD RULE)
+
+**For migration projects** (`reference.legacy.path` set in `project-config.yml`):
+
+For EVERY new page in the migration scope, you MUST run visual-diff against legacy production. "Skipped because no reference exists" is NOT a valid reason — the legacy production URL IS the reference.
+
+Steps:
+1. Check `.claude/project-config.yml` → `reference.visual_diff.reference_url` (legacy production)
+2. For each page added/modified, run `python3 scripts/visual-diff.py {page}`
+3. If diff > 1% → either iterate fixes (Stage 5b loop) OR explicitly mark as "visual debt" in qa-results.md AND BACKLOG.md
+4. NEVER mark verdict PASS if visual-diff was skipped on a migration project. Use PARTIAL_PASS with "visual debt" tag.
+
 ## Your role
 - TypeScript check (if applicable)
 - Unit/integration tests
 - Build verification
-- Visual diff (if CSS changed)
+- Visual diff (if CSS changed) — MANDATORY for migration projects
 - Coverage check
 
 ## Process
