@@ -1,0 +1,88 @@
+---
+name: error-learning
+user-invocable: true
+description: Error learning skill — record and analyze bugs after fixing. Use AFTER every bugfix to capture Symptom → Root Cause → Fix → Prevention. Updates memory/feedback files and tasks/reflection-history.md. Prevents same error from happening again.
+---
+
+# Skill: Error Learning
+
+> Единая точка входа для записи и анализа ошибок. Дополняет protocol-bugfix (step LEARN).
+> Запуск: `/error-learning` или автоматически после bugfix, RCA, freeze recovery, 2+ неудачных попыток
+
+---
+
+## Когда вызывать
+
+| Событие | Применять? |
+|---------|-----------|
+| После bugfix / RCA | ОБЯЗАТЕЛЬНО |
+| После freeze recovery | ОБЯЗАТЕЛЬНО |
+| После 2+ неудачных попыток | ДА |
+| Когда ошибка повторилась | НЕМЕДЛЕННО |
+
+---
+
+## Процесс (3 шага)
+
+### 1. Записать ошибку
+
+Добавить в `experience.md` (memory):
+
+```markdown
+| # | Date | Type | Error | Root Cause | Lesson | Prevention |
+|---|------|------|-------|-----------|---------|------------|
+| N | {date} | {type} | {что} | {почему} | {урок} | {как предотвратить} |
+```
+
+Типы: Build, Runtime, Logic, Test, Deploy, Config, API, Type, Process
+
+### 2. Gap Analysis
+
+```markdown
+## Gap Analysis
+
+### Какое правило должно было предотвратить?
+[файл из .claude/rules/ или skills/]
+
+### Почему не предотвратило?
+- [ ] Правило отсутствует
+- [ ] Правило неполное
+- [ ] Правило проигнорировано
+- [ ] Правило есть, но не вызывается в нужный момент
+
+### Что добавить/изменить?
+[конкретное правило или шаг]
+```
+
+### 3. Создать Improvement
+
+```markdown
+## IMPROVEMENT #N: {date} — {название}
+
+**Источник:** {из какой ошибки}
+**Проблема:** {что пошло не так}
+**Root Cause:** {почему}
+**Предложение:** {что добавить в rules/skills}
+**Целевой файл:** {какой .claude/ файл изменить}
+**Приоритет:** 🔴 High / 🟡 Medium / 🟢 Low
+```
+
+Если ошибка повторилась 3+ раз → **СТОП** → обновить правила НЕМЕДЛЕННО (не в backlog).
+
+---
+
+## Связь с другими skills
+
+- `/protocol-bugfix` → вызывает `/error-learning` на шаге LEARN
+- `/session-end` → проверяет experience.md, записывает новые ошибки
+- `/backlog-to-rules` → внедряет накопленные improvements в правила
+- `/reflection` → анализирует patterns из experience.md
+
+---
+
+## Правила
+
+- **КАЖДАЯ** ошибка = запись в experience.md
+- **КАЖДАЯ** запись = gap analysis (какое правило пропустило?)
+- Improvements копятся → `/backlog-to-rules` внедряет их
+- Ошибка повторилась 3+ раз → немедленное обновление правил

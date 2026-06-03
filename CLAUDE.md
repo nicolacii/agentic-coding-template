@@ -1,117 +1,46 @@
-# CLAUDE.md — Project Instructions
+# CLAUDE.md — Agentic Coding Template
 
-> Этот файл загружается автоматически в каждый разговор с Claude Code.
-> Скопируйте в корень проекта и добавьте проектную специфику.
-
----
-
-## Response Protocol
-
-### Каждый ответ ОБЯЗАН содержать:
-
-**1. Сложность** (первая строка):
-```
-**Сложность: 🟢 SIMPLE** — [причина]
-```
-
-| Уровень | Когда | Flow |
-|---------|-------|------|
-| 🟢 SIMPLE | 1-2 файла | Execute → Verify → DONE |
-| 🟡 STANDARD | Фича, баг, несколько файлов | Prompt Prep → Plan → Execute → Verify → DONE |
-| 🔴 COMPLEX | Архитектура, миграция | Prompt Prep → Plan → Execute → Verify + Review → DONE |
-
-**2. Prompt Preparation** (STANDARD/COMPLEX):
-```
-Goal: [результат]
-Constraints: [ДОСЛОВНЫЕ цитаты из запроса]
-Protocol: [какой протокол применить]
-```
-
-**3. DONE блок** (в конце КАЖДОГО ответа):
-```
----
-## DONE
-Сложность: 🟢/🟡/🔴
-Что сделано: [список]
-Проверки: Cross-check ✅ | Challenge ✅
-Уверенность: [X]%
----
-```
+> Шаблон-болванка для создания нового проекта. Универсальные правила процесса — в `~/.claude/CLAUDE.md`, **здесь дублировать НЕ нужно**.
 
 ---
 
-## Routing Table
+## Что это
 
-| Задача | Протокол |
-|--------|----------|
-| Новая фича | `.claude/skills/protocol-development.md` → TDD |
-| Баг / ошибка | `.claude/skills/protocol-bugfix.md` → 5 Whys |
-| Рефакторинг | `.claude/skills/protocol-refactoring.md` → Tests first |
-| Данные / анализ | `.claude/skills/protocol-research.md` → Data first |
+Стартовый каркас для проектов с workflow-pipeline (TASK → ANALYSIS → IMPLEMENT → REVIEW → TESTING → REFLECTION). Содержит:
+
+- `.claude/skills/` — on-demand протоколы (копируется в новый проект)
+- `.claude/sub-agents/` — роли для multi-agent orchestration
+- `.claude/project-config.yml` — конфиг (multi_agent mode, sub-agent roster)
+- `templates/` — заготовки (research-template, ADR-template, и т.д.)
+- `tasks/` — структура для артефактов pipeline
+- `WORKFLOW.md` — 6-этапный pipeline (детали)
 
 ---
 
-## Verification Rules
+## Как использовать
 
-### Cross-check (каждый ответ)
-Каждый созданный/изменённый файл: ОТКРЫТЬ и проверить ДРУГИМ методом.
+При создании нового проекта в `Work-work/`:
 
-### Challenge (4 вопроса)
-1. Как опровергнуть? 2. Все файлы открыл? 3. Edge cases? 4. Job решён?
-
-### Visual Diff (для CSS/UI работы)
 ```bash
-python3 scripts/visual-diff.py {page}
+NEW_PROJECT_NAME=my-new-project
+cp -r agentic-coding-template "../$NEW_PROJECT_NAME"
+cd "../$NEW_PROJECT_NAME"
 ```
-Итерировать пока diff < 1%. **ЗАПРЕЩЕНО** говорить "визуально совпадает" без diff < 1%.
+
+Затем в Claude Code из папки нового проекта:
+
+```
+/init-project
+```
+
+— это интерактивно настроит: project type, stack, multi_agent mode (none/lightweight/full), conventions. Создаст `AGENTS.md`, `RESEARCH.md`, заполнит конфиг.
+
+После `/init-project` — заменить этот файл (`CLAUDE.md`) на slim-версию с проектной спецификой (см. `Analytics-Agent/CLAUDE.md` или `Localisation-Agent/CLAUDE.md` как пример).
 
 ---
 
-## Рефлексии → Правила (обязательный цикл)
+## Hard rules для самого шаблона
 
-После КАЖДОЙ рефлексии (этап 6 pipeline):
-```
-Lesson о поведении агента?   → memory/feedback_*.md
-Lesson о процессе?           → core-rules.md или WORKFLOW.md
-Предложение по продукту/UX?  → tasks/improvements.md
-Факт о проекте?              → RESEARCH.md
-```
-
-**ЗАПРЕЩЕНО** записывать рефлексию без обновления хотя бы одного из этих файлов.
-
----
-
-## Code Standards
-
-- **KISS/YAGNI:** Перед абстракцией: нужно сейчас? Решает реальную проблему? Можно проще?
-- **File Size:** Components < 200 строк (hard: 400). Services < 400 (hard: 800).
-- **Tests:** TDD. Coverage ≥ 80% для нового кода.
-- **Commits:** `type(scope): description` — feat, fix, refactor, test.
-
----
-
-## Forbidden Actions
-
-- ❌ Файлы с `_fixed`, `_final`, `_v2`
-- ❌ "Готово" без открытия файлов
-- ❌ "Работает" без запуска
-- ❌ "Совпадает" без visual diff < 1%
-- ❌ Код ДО test cases
-- ❌ Пропускать pipeline этапы
-- ❌ git push без тестов
-
----
-
-## Проектная специфика (ЗАПОЛНИТЬ)
-
-```
-## Контекст
-- Стек: [ваш стек]
-- Архитектура: [описание]
-
-## Ключевые файлы
-- [путь]: [описание]
-
-## Правила проекта
-- [ваши правила]
-```
+- **README шаблона vs core-rules:** если README-инструкции «quick start» противоречат rules в `~/.claude/CLAUDE.md` — **rules авторитетнее**. README — для людей, rules — автоматический контракт для агента.
+- Шаблон **не содержит** проектного контента: ни AGENTS.md (хаб), ни RESEARCH.md, ни BACKLOG.md. Эти файлы создаются `/init-project` для конкретного проекта.
+- Перед обновлением шаблона — сначала валидировать на реальном проекте (например, обкатать на Analytics-Agent), потом переносить в шаблон.

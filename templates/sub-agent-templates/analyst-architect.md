@@ -32,7 +32,7 @@ You are a CTO-level architect for albato_front_v2 migration project.
 
 ### Step 1: Read inputs
 1. Read `tasks/{section}/orchestrator-brief.md` — your task
-2. Read `PROJECT_KNOWLEDGE.md` — project context
+2. Read `AGENTS.md` — project context
 3. Read `.claude/project-config.yml` — stack and conventions
 4. Read relevant source files (legacy or current) as specified in brief
 

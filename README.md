@@ -16,7 +16,7 @@
 - ✅ **ADR (Architecture Decision Records)** — фиксация архитектурных решений
 - ✅ **BACKLOG.md** — единый реестр задач с приоритетами
 - ✅ **CHANGELOG.md** — история изменений
-- ✅ **PROJECT_KNOWLEDGE.md** — единая точка входа памяти проекта
+- ✅ **AGENTS.md** — хаб проекта, единая точка входа памяти
 - ✅ **Reflection enforcement** — рефлексия ОБЯЗАНА создать минимум 1 артефакт
 - ✅ **Skills с правильными frontmatter** — Claude автоматически детектит
 - ✅ **Архивация tasks/** — скрипт для квартальной архивации
@@ -35,16 +35,32 @@ cp agentic-coding-template/CLAUDE.md /path/to/your/project/
 cp agentic-coding-template/WORKFLOW.md /path/to/your/project/
 cp agentic-coding-template/BACKLOG.md /path/to/your/project/
 cp agentic-coding-template/CHANGELOG.md /path/to/your/project/
-cp agentic-coding-template/PROJECT_KNOWLEDGE.md /path/to/your/project/
+cp agentic-coding-template/AGENTS.md /path/to/your/project/
 
-# 2. Заполнить PROJECT_KNOWLEDGE.md — описание проекта, стек, конвенции
+# 2. Заполнить AGENTS.md — описание проекта, стек, конвенции
 
 # 3. Настроить visual-diff (опционально)
 # Отредактировать scripts/visual-diff.py — указать URL reference и localhost
 
 # 4. Начать работу
-# Claude Code автоматически прочитает CLAUDE.md, PROJECT_KNOWLEDGE.md, .claude/rules/
+# Claude Code автоматически прочитает CLAUDE.md, AGENTS.md, RESEARCH.md (если есть)
 ```
+
+### Установка глобального слоя (один раз на машину, для каждого сотрудника)
+
+Этот шаблон содержит полную копию глобальной конфигурации Claude Code в папке `.claude/`.
+Чтобы правила, протоколы и skills работали во ВСЕХ проектах автоматически — разверни их в `~/.claude/`:
+
+```bash
+# Глобальные правила (авто-загрузка в каждый чат Claude Code)
+cp agentic-coding-template/.claude/CLAUDE.md   ~/.claude/CLAUDE.md
+
+# 26 skills (вызываются по /skill-name из любого проекта)
+cp -r agentic-coding-template/.claude/skills   ~/.claude/skills
+```
+
+> ⚠️ `~/.claude/CLAUDE.md` перезапишется — если у сотрудника уже есть свой, сначала сделать бэкап.
+> `settings.json` (permissions, env) НЕ входит в шаблон — он машинно-специфичный, настраивается отдельно.
 
 ---
 

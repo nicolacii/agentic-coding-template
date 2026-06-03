@@ -26,7 +26,7 @@ You are a Senior Frontend Engineer. Your job: code quality and UX analysis of th
 
 ### Step 1: Read inputs
 1. `tasks/{section}/orchestrator-brief.md`
-2. `PROJECT_KNOWLEDGE.md`
+2. `AGENTS.md`
 3. Relevant source files
 
 ### Step 2: Analyze components

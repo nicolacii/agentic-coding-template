@@ -103,4 +103,4 @@
 - **После крупной задачи (> 5 files changed):** обязательно секция "Phase N" с изменениями (см. WORKFLOW.md Stage 2 Hard Rule для структуры).
 - **Размер:** держи < 2000 строк. Если растёт — разбивай на `RESEARCH-{submodule}.md` и оставляй в главном файле только оглавление.
 - **Не дублируй CHANGELOG.md** — CHANGELOG = user-facing, RESEARCH = developer-facing. RESEARCH отвечает на "как оно устроено" и "почему так", CHANGELOG на "что изменилось".
-- **Не дублируй AGENTS.md / PROJECT_KNOWLEDGE.md** — AGENTS.md = quick start navigation, RESEARCH.md = deep-dive content.
+- **Не дублируй AGENTS.md** — AGENTS.md = quick start navigation, RESEARCH.md = deep-dive content.
