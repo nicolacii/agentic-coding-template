@@ -64,7 +64,7 @@ Pipeline violations: N
 
 ## Self-improvement artifacts created
 - [ ] memory/feedback_*.md
-- [ ] core-rules.md update
+- [ ] CLAUDE.md update
 - [ ] WORKFLOW.md update
 - [ ] docs/adr/ADR-XXX.md (NEW)
 - [ ] .claude/skills/{new-skill}.md (NEW)
@@ -79,7 +79,7 @@ Pipeline violations: N
 | Артефакт | Когда создавать |
 |----------|----------------|
 | `memory/feedback_*.md` | Lesson о поведении агента (повторяющаяся ошибка) |
-| `core-rules.md` update | Lesson о процессе (новое правило) |
+| `CLAUDE.md` update | Lesson о процессе (новое правило) |
 | `WORKFLOW.md` update | Изменение pipeline |
 | `docs/adr/ADR-XXX.md` | Архитектурное решение принято |
 | `.claude/skills/{new}.md` | Паттерн повторился 3+ раз → новый skill |
@@ -101,7 +101,7 @@ Pipeline violations: N
 Если в reflection-history.md одна и та же ошибка появляется 3+ раз:
 1. Создать новый skill в `.claude/skills/{name}.md`
 2. Добавить frontmatter с triggers
-3. Обновить `core-rules.md` — добавить точку вызова
+3. Обновить `CLAUDE.md` — добавить точку вызова
 4. Записать в reflection.md что создан новый skill
 
 ---

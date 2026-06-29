@@ -41,6 +41,6 @@ cd "../$NEW_PROJECT_NAME"
 
 ## Hard rules для самого шаблона
 
-- **README шаблона vs core-rules:** если README-инструкции «quick start» противоречат rules в `~/.claude/CLAUDE.md` — **rules авторитетнее**. README — для людей, rules — автоматический контракт для агента.
+- **README шаблона vs rules:** если README-инструкции «quick start» противоречат rules в `~/.claude/CLAUDE.md` — **rules авторитетнее**. README — для людей, rules — автоматический контракт для агента.
 - Шаблон **не содержит** проектного контента: ни AGENTS.md (хаб), ни RESEARCH.md, ни BACKLOG.md. Эти файлы создаются `/init-project` для конкретного проекта.
 - Перед обновлением шаблона — сначала валидировать на реальном проекте (например, обкатать на Analytics-Agent), потом переносить в шаблон.

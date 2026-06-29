@@ -45,7 +45,7 @@
 
 ```
 [ ] → memory/feedback_*.md (lesson о поведении)
-[ ] → core-rules.md или WORKFLOW.md (lesson о процессе)
+[ ] → CLAUDE.md или WORKFLOW.md (lesson о процессе)
 [ ] → tasks/improvements.md (предложения)
 [ ] → RESEARCH.md (факты о проекте)
 [ ] → tasks/reflection-history.md (запись)

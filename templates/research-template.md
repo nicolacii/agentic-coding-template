@@ -1,6 +1,6 @@
 # RESEARCH.md — {Project Name} Encyclopedia
 
-> **Hard rule** (`.claude/rules/core-rules.md`): читать этот файл перед первой задачей в сессии.
+> **Hard rule** (`CLAUDE.md`): читать этот файл перед первой задачей в сессии.
 >
 > **Цель:** persistent deep-dive в проект, который не выводится из `git log` или быстрого `grep`. Всё, что стоит знать ДО того как трогать код.
 >

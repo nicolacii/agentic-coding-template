@@ -75,7 +75,7 @@ custom_skills:
   # - path/to/custom-skill.md
 
 # Persistent project knowledge
-# Hard rule from core-rules.md: read RESEARCH.md before first task in any session.
+# Hard rule from CLAUDE.md: read RESEARCH.md before first task in any session.
 # Created by /init-project step 7 (see .claude/skills/init-project.md).
 research_md:
   required: true

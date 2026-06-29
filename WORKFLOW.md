@@ -1,4 +1,4 @@
-# WORKFLOW.md — Development Pipeline v2
+/# WORKFLOW.md — Development Pipeline v2
 
 > Каждая задача с кодом проходит 7 обязательных этапов.
 > Git workflow интегрирован: feature branch на старте, PR на завершении.
@@ -9,7 +9,7 @@
 
 ```
 ┌──────┐  ┌────────┐  ┌──────────┐  ┌───────────┐  ┌────────┐  ┌──────┐  ┌─────────┐  ┌────────┐
-│0.GIT │→ │1.TASK  │→ │2.ANALYSIS│→ │3.IMPLEMENT│→ │4.REVIEW│→ │5.TEST│→ │6.REFLECT│→ │7.MERGE │
+│0.GIT │→ │1.BS+TSK│→ │2.ANALYSIS│→ │3.IMPLEMENT│→ │4.REVIEW│→ │5.TEST│→ │6.REFLECT│→ │7.MERGE │
 └──────┘  └────────┘  └──────────┘  └───────────┘  └────────┘  └──────┘  └─────────┘  └────────┘
 ```
 
@@ -37,19 +37,32 @@ git checkout -b feat/error-pages
 
 ---
 
-## Этап 1: TASK
+## Этап 1: BRAINSTORM + TASK (продуктовый контроль — владелец WHAT)
 
-**Выход:** `tasks/{section}/tasks-{section}.md`
+**Выход:** `tasks/{section}/tasks-{section}.md` (с секцией Decisions Log)
+
+> Эта стадия определяет **ЧТО** строим (scope, UX, поведение, тексты). Пользователь
+> участвует здесь. Stage 2 (ANALYSIS) — это уже **КАК** (код/архитектура), туда
+> пользователь не идёт. Поэтому всю продуктовую неопределённость снимаем ДО анализа.
 
 1. Прочитать `BACKLOG.md` — найти задачу
-2. Определить scope: страницы, компоненты, API
-3. Sub-tasks (5-8 высокоуровневых) с тестами в каждом
-4. Указать Relevant Files
-5. Обновить `BACKLOG.md` — статус задачи `IN_PROGRESS`
+2. **PRODUCT GATE** (если задача user-facing / задевает scope; технические — пропустить):
+   - **a. Brainstorm** — уточняющие вопросы пользователю ПО ОДНОМУ за раз (multiple-choice), пока не ясны цель / scope / UX / критерии успеха.
+   - **b. Список продуктовых решений** → пользователю на явный выбор (scope, in/out MVP, UX-флоу, тексты, видимые данные). Технические дефолты — озвучить, не блокировать.
+   - **c. 🚦 HARD-GATE:** Stage 2 ANALYSIS и любой код — ТОЛЬКО после апрува продуктовых решений.
+   - **d. Decisions Log** в task-файл: решение → кто решил (пользователь / AI-default).
+   - 🚩 «я предположил / для удобства / логично» = СТОП, вынести вопрос (см. global CLAUDE.md «1c-PG»).
+3. Определить scope: страницы, компоненты, API (из утверждённых решений)
+4. Sub-tasks (5-8 высокоуровневых) с тестами в каждом
+5. Указать Relevant Files
+6. Обновить `BACKLOG.md` — статус задачи `IN_PROGRESS`
 
 ---
 
 ## Этап 2: ANALYSIS
+
+> ⚙️ Код / архитектура / data flow. **Пользователь НЕ участвует** — стадия
+> consumes уже детализированную и продуктово-утверждённую постановку из Stage 1.
 
 **Выход:**
 - Manual: `tasks/{section}/analysis-{section}.md`
@@ -283,7 +296,7 @@ QA sub-agent итерирует visual-diff пока < 1%.
 
 ```
 Lesson о поведении агента?  → memory/feedback_*.md
-Lesson о процессе?          → core-rules.md или WORKFLOW.md
+Lesson о процессе?          → CLAUDE.md или WORKFLOW.md
 Архитектурное решение?      → docs/adr/ADR-XXX-{title}.md (НОВЫЙ)
 Повторяющийся паттерн (3+)? → .claude/skills/{new-skill}.md (НОВЫЙ)
 Предложение по продукту?    → tasks/improvements.md

@@ -123,3 +123,31 @@ C) Do nothing
 - Больше edge cases, не меньше
 - Explicit лучше clever
 - Каждый issue = file:line + конкретные options
+
+---
+
+## Rubric + Verdict (усиление, источник: Superpowers `requesting-code-review`)
+
+**Whole-branch review дроби fresh-субагентом** (свой контекст, не история сессии).
+Обязателен после крупной фичи и перед мержем. Дробить с git-диапазоном (BASE..HEAD).
+
+**Read-only:** ревьюер НЕ мутирует рабочее дерево/индекс/HEAD. Только `git show/diff/log`;
+для чужой ревизии — отдельный `git worktree`, не двигать HEAD.
+
+**5 осей (чек-лист, не «посмотри код»):**
+1. **Plan alignment** — реализовано по плану/требованиям? Отклонения — улучшения или проблемы?
+2. **Code quality** — separation of concerns, error handling, type safety, DRY без преждевременной абстракции, edge cases.
+3. **Architecture** — здравые решения, scalability/perf, security, чистая интеграция.
+4. **Testing** — тесты проверяют **реальное поведение, не моки**; edge cases; integration где важно; все зелёные.
+5. **Production readiness** — миграции, обратная совместимость, доки, очевидные баги.
+
+**Калибровка severity** (не всё Critical):
+- 🔴 **Critical (Must Fix)** — баги, security, потеря данных, сломанная функциональность.
+- 🟡 **Important (Should Fix)** — архитектура, missing features, плохой error handling, дыры в тестах.
+- 🟢 **Minor (Nice to Have)** — стиль, оптимизация, доки.
+
+Каждый issue = `file:line + что не так + почему важно + как чинить`. **Сначала признать strengths** (точная похвала повышает доверие к остальному фидбеку).
+
+**Обязательный verdict в конце:** `Ready to merge? Yes / No / With fixes` + 1-2 предложения обоснования. Без вердикта review не завершён.
+
+После получения findings → применять через skill `/receiving-review`.

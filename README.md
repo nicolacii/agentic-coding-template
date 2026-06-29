@@ -71,7 +71,7 @@ cp -r agentic-coding-template/.claude/skills   ~/.claude/skills
 ```
 ┌──────────────────────────────────────────────────────┐
 │  Уровень 1: ПРАВИЛА (always loaded)                  │
-│  .claude/rules/core-rules.md — ~180 строк            │
+│  ~/.claude/CLAUDE.md (global) + <project>/CLAUDE.md   │
 │  Загружается в КАЖДЫЙ разговор автоматически          │
 └──────────────────────────────────────────────────────┘
         ↓ routing по типу задачи
@@ -167,7 +167,7 @@ tasks/{section}/
     │       └── → Загружается в КАЖДУЮ сессию автоматически
     │
     ├── Actionable lesson о ПРОЦЕССЕ?
-    │   └── → core-rules.md или WORKFLOW.md (правила)
+    │   └── → CLAUDE.md или WORKFLOW.md (правила)
     │       └── → Загружается в КАЖДЫЙ ответ
     │
     ├── Предложение по ПРОДУКТУ/UX?
@@ -188,7 +188,7 @@ tasks/{section}/
 4. Какие паттерны повторять? → в memory/feedback
 5. Какие паттерны избегать? → в memory/feedback
 6. Что нужно доработать? → в tasks/improvements.md
-7. Какие правила добавить? → в core-rules.md / WORKFLOW.md
+7. Какие правила добавить? → в CLAUDE.md / WORKFLOW.md
 ```
 
 ### Чеклист после рефлексии
@@ -197,7 +197,7 @@ tasks/{section}/
 [ ] Записана reflection.md с 7 вопросами?
 [ ] Обновлён tasks/reflection-history.md?
 [ ] Actionable items → memory/feedback_*.md?
-[ ] Критичные lessons → core-rules.md?
+[ ] Критичные lessons → CLAUDE.md?
 [ ] Process improvements → WORKFLOW.md?
 [ ] UX/product ideas → tasks/improvements.md?
 [ ] Факты о проекте → RESEARCH.md?
@@ -303,9 +303,8 @@ PAGES = {
 
 ```
 your-project/
+├── CLAUDE.md                           # Правила проекта (always loaded; глобальные — в ~/.claude/CLAUDE.md)
 ├── .claude/
-│   ├── rules/
-│   │   └── core-rules.md              # Основные правила (always loaded)
 │   └── skills/                         # 24 скилла (on-demand)
 │       ├── protocol-development.md     # TDD протокол
 │       ├── protocol-bugfix.md          # 5 Whys протокол

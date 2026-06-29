@@ -99,7 +99,7 @@
 
 ## Project-Specific Rules
 
-> Здесь — что специфично для этого проекта (не входит в core-rules)
+> Здесь — что специфично для этого проекта (не входит в CLAUDE.md)
 
 - _пример: Все API endpoints должны проходить через api/client.ts_
 - _пример: Никаких inline styles — только SCSS modules или BEM_
