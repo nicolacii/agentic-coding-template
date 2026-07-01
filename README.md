@@ -8,7 +8,7 @@
 - 🆕 **`/init-project` wizard** — интерактивная настройка нового проекта
 - 🆕 **Universal sub-agent templates** — analyst, developer, reviewer, qa роли
 - 🆕 **`.claude/project-config.yml`** — конфигурация stack, ролей, конвенций
-- 🆕 **26 skills** (было 24) — добавлены init-project и orchestrate
+- 🆕 **29 skills** (было 26) — добавлены `writing-skills`, `writing-plans` (Superpowers adoption)
 
 ## Что было в v2
 
@@ -55,7 +55,7 @@ cp agentic-coding-template/AGENTS.md /path/to/your/project/
 # Глобальные правила (авто-загрузка в каждый чат Claude Code)
 cp agentic-coding-template/.claude/CLAUDE.md   ~/.claude/CLAUDE.md
 
-# 26 skills (вызываются по /skill-name из любого проекта)
+# 29 skills (вызываются по /skill-name из любого проекта)
 cp -r agentic-coding-template/.claude/skills   ~/.claude/skills
 ```
 
@@ -305,7 +305,7 @@ PAGES = {
 your-project/
 ├── CLAUDE.md                           # Правила проекта (always loaded; глобальные — в ~/.claude/CLAUDE.md)
 ├── .claude/
-│   └── skills/                         # 24 скилла (on-demand)
+│   └── skills/                         # 29 скиллов (on-demand)
 │       ├── protocol-development.md     # TDD протокол
 │       ├── protocol-bugfix.md          # 5 Whys протокол
 │       ├── protocol-refactoring.md     # Tests first
@@ -339,7 +339,7 @@ your-project/
 │   ├── improvements.md            # Backlog улучшений
 │   └── reflection-history.md      # История рефлексий
 ├── CLAUDE.md                      # Главный конфиг (project-specific)
-└── WORKFLOW.md                    # Pipeline (6 этапов)
+└── WORKFLOW.md                    # Pipeline (0.GIT → 7.MERGE)
 ```
 
 ---
@@ -381,8 +381,8 @@ your-project/
 
 ## FAQ
 
-**Q: Обязательно ли проходить все 6 этапов pipeline?**
-A: Да, для КАЖДОЙ задачи с кодом. Это правило появилось после того, как пропуск этапов привёл к накоплению багов и повторным исправлениям.
+**Q: Обязательно ли проходить все 7 этапов pipeline?**
+A: Зависит от размера задачи (lane routing в WORKFLOW.md). **XS/S** идут инлайн по короткой дорожке `0.GIT → 3.IMPLEMENT → 5.TEST → 7.MERGE`. **M и выше** проходят все 7 этапов с субагентами. Полный pipeline нельзя срезать «для скорости» на M+ — пропуск этапов приводил к багам и повторным исправлениям.
 
 **Q: Что если пользователь говорит "давай дальше", а этапы не пройдены?**
 A: Агент обязан предупредить: "Пропускаем этап X? Это нарушение pipeline." Пользователь может подтвердить, но это осознанное решение.

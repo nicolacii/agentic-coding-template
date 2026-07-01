@@ -1,7 +1,7 @@
 # WORKFLOW.md — Global Development Pipeline v3
 
 > **Глобальный пайплайн.** Лежит в `~/.claude/WORKFLOW.md`, применяется ко ВСЕМ
-> проектам (проектные копии больше не нужны — не дублировать). Дополняет
+> проектам (проектные копии опциональны — если проект держит свою, синхронизировать с этой). Дополняет
 > `~/.claude/CLAUDE.md` (ШАГ 0–5 = протокол ответа; этот файл = пайплайн задачи-с-кодом).
 > Product Gate (1c-PG) живёт в CLAUDE.md — здесь не дублируется, только вызывается.
 
@@ -282,9 +282,13 @@ Task("reviewer-architect") + Task("reviewer-fe-senior")  # parallel
 
 ### Manual mode
 
-Проверить: архитектура, типы, тесты, accessibility, security.
+Использовать skill **`/review`** + шаблон **`~/.claude/templates/review-template.md`** (evidence-based / adversarial). Ревью ≠ «прогнал линтер → APPROVED»:
 
-**Verdict:** APPROVED / CHANGES REQUESTED
+1. **Evidence gate (ДО findings):** прогнать ПОЛНЫЙ тест-suite (не только новые) + typecheck + build; прочитать реально изменённые файлы (file:line); на каждое утверждение — процитировать тест-доказательство. Нет доказательства → **UNVERIFIED**.
+2. **Findings по severity** (critical/important/minor), каждый: **file:line · consequence (вход→неверный выход) · fix · risk.** `medium`-correctness-gap (не краш) всё равно репортится.
+3. **Adversarial clearing (ОБЯЗАТЕЛЬНО):** явно ПРОВЕРИТЬ и ОЧИСТИТЬ категории риска с доказательством (`injection · XSS · authz/scope · secrets-never-leak · partial-failure/idempotency · pagination/N+1`). «CLEAN because <evidence>» — требуемый вывод, не пропуск.
+
+**Verdict (taxonomy):** **APPROVED** / **APPROVE-WITH-NITS** (функц. ок, тесты зелёные, только minor/by-design ниты → мерж разрешён) / **CHANGES REQUESTED** (≥1 critical/important или падающий/отсутствующий тест). Verdict первой строкой, evidence ниже.
 
 ---
 

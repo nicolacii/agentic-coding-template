@@ -60,6 +60,12 @@
 
 **Hard Stop:** без прочтения протокола кодинг ЗАПРЕЩЁН.
 
+**1a+. Pipeline & lane (задачи с кодом):** пайплайн — в `~/.claude/WORKFLOW.md` (глобальный).
+Дорожка по размеру (оценивает Claude): **XS/S** → inline (solo, без субагентов) · **M** → полный
+workflow + субагенты (single-track: 1 analyst → 1 developer → 1 reviewer; этап ANALYSIS сохраняется) ·
+**L/XL** → полный workflow + параллельный фан-аут субагентов. **Граница: S/XS инлайн; M и выше —
+оркестрация.** Детали — в `~/.claude/WORKFLOW.md`.
+
 **1b. Prompt Preparation** (extract ПЕРЕД любым действием):
 
 ```

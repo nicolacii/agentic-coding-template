@@ -150,4 +150,36 @@ C) Do nothing
 
 **Обязательный verdict в конце:** `Ready to merge? Yes / No / With fixes` + 1-2 предложения обоснования. Без вердикта review не завершён.
 
+---
+
+## Evidence gate + Adversarial clearing (усиление, источник: Superpowers + Localisation-Agent pipeline)
+
+Ревью ≠ «прогнал линтер → APPROVED». Два обязательных дополнения к рубрике выше:
+
+**1. Evidence gate — ДО написания findings.** Никогда не утверждать finding без доказательства:
+- Прогнать **ПОЛНЫЙ** тест-suite (не только новые тесты) — это regression-доказательство; записать «N passed, M skipped».
+- Прочитать реально изменённые файлы (`file:line`), не только summary разработчика.
+- На каждое поведение, которое утверждаешь — **найти тест, который это доказывает, и процитировать его имя**.
+- Бар: «I now have complete evidence for each finding». Нет доказательства → пометить finding **UNVERIFIED** и сказать, что нужно для подтверждения.
+
+**2. Adversarial clearing — доказывай ОТСУТСТВИЕ, а не просто опускай.** Явно ПРОВЕРИТЬ и ОЧИСТИТЬ ключевые категории риска, релевантные изменению, с доказательством. `CLEAN (no issue found) because <evidence>` — **требуемый вывод**, а не пропуск. Именно это отличает реальное ревью от беглого просмотра.
+
+| Категория | Verdict | Доказательство |
+|-----------|---------|----------------|
+| Injection (SQL/command) | CLEAN / ISSUE | {параметризованные запросы file:line} |
+| XSS / output encoding | CLEAN / ISSUE / N-A | {esc()-раундтрип экранирует каждое поле} |
+| AuthZ / access control | CLEAN / ISSUE | {каждый роут за auth; tenant-scope применён} |
+| Secrets never leak | CLEAN / ISSUE | {masked; резолв server-side; assert в тесте X} |
+| Partial-failure / idempotency | CORRECT / BROKEN | {re-apply = no-op; тест Y} |
+| Pagination / N+1 | CORRECT / ISSUE | {total из meta; одна выборка, не per-row} |
+
+**3. Verdict-taxonomy — три состояния (не бинарно):**
+- **APPROVED** — нет findings выше `minor`; ship.
+- **APPROVE-WITH-NITS** — функционально ок, тесты зелёные, блокеров нет; остались только `minor`/by-design ниты (перечислить, мерж разрешён).
+- **CHANGES REQUESTED / BLOCK** — ≥1 `critical`/`important` finding, или падающий/отсутствующий тест на реальном пути.
+
+Verdict — первой строкой; findings по severity; cleared-categories таблица — обязательна. Шаблон: `~/.claude/templates/review-template.md`.
+
+---
+
 После получения findings → применять через skill `/receiving-review`.
