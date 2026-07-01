@@ -124,6 +124,7 @@ Check:    [как поймём что готово]
 
 | Sub-agent role | Model | Reason |
 |----------------|-------|--------|
+| **brainstorm / product gate (Stage 1)** | **Opus (самая умная, max effort)** | Продуктовые решения — scope, in/out MVP, UX, тексты. Цена ошибки максимальная, ошибка тиражируется на все последующие этапы. Всегда самая умная доступная модель (на 2026-06: Opus 4.8). |
 | analyst-* (любой) | **Opus** | Глубокий анализ legacy кода, ambiguous decisions |
 | developer-types | **Sonnet** | Mechanical type porting, faster, fewer 529 errors |
 | developer-api / developer-* (типовые) | **Sonnet** | Established patterns, sufficient quality |
@@ -536,6 +537,8 @@ Over-engineering red flags (STOP and simplify):
 | `/fix-last-task` | После «done» с багом |
 | `/backlog-to-rules` | 5+ improvements |
 | `/review` | Перед мержем |
+| `/writing-skills` | Создаёшь/правишь скилл или правило (reflection→rules): «Match the Form to the Failure», skills = TDD для доков |
+| `/writing-plans` | M/L/XL: план для субагента/свежей сессии (Global Constraints + Consumes/Produces + No Placeholders), перед `/orchestrate` |
 
 ### Analysis
 | Skill | Когда |

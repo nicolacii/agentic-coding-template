@@ -88,6 +88,8 @@ Pipeline violations: N
 
 **Если задача прошла идеально и нечего улучшать** — добавить запись в `tasks/reflection-history.md` с пометкой `No improvements needed` и обоснованием. Это тоже артефакт.
 
+> 📐 Когда артефакт = новое правило/скилл (update CLAUDE.md/WORKFLOW.md или новый skill) — пиши его по **`/writing-skills`**: классифицируй baseline-провал и выбери форму («Match the Form to the Failure»: prohibition vs recipe vs structural vs conditional). Правило не той формы не связывает поведение.
+
 ### Шаг 5: Обновить reflection-history.md
 
 ```markdown

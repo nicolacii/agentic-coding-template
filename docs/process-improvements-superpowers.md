@@ -289,6 +289,17 @@ skills (verify, reflection, backlog-to-rules), template `WORKFLOW.md`, `README.m
 `AGENTS.md`, `CLAUDE.md` ×2, 3 `templates/*`, `system-architecture.html`. Historical
 version-note kept. Verified: 0 functional residuals (only line-5 provenance + this doc).
 
+**2026-07-01 — Superpowers wave 2 (full 14-skill audit) applied** (live `~/.claude` + template synced, grep-verified):
+- **NEW skill `writing-skills`** — skills = TDD for process docs; RED-GREEN-REFACTOR; **"Match the Form to the Failure"** (prohibition vs recipe/contract vs structural vs conditional); rationalization tables; `description` = when-to-use NOT what. This is the methodology layer for our reflection→rules cycle. Cross-reffed from `reflection` + `backlog-to-rules`.
+- **NEW skill `writing-plans`** — Global Constraints verbatim, task interfaces Consumes/Produces, No Placeholders, bite-sized TDD steps, plan self-review; for M/L/XL before `/orchestrate`.
+- **`protocol-development`** → "TDD Anti-Rationalization (броня)": Iron Law (no prod code without failing test), watch-it-fail, delete-code-before-test, rationalization table + red flags (from Superpowers `test-driven-development`).
+- **`protocol-bugfix`** → "Systematic Debugging": multi-component evidence gathering, root-cause backward tracing, **3+ failed fixes → question architecture (escalate)**, rationalization table + red flags (from `systematic-debugging`).
+- **`orchestrate`** → Durable Progress ledger (survives compaction), File Handoffs (files not pasted context), don't pre-judge reviewer findings, model-selection-by-complexity, ad-hoc parallel fan-out prompt structure (from `subagent-driven-development` + `dispatching-parallel-agents`).
+- **`WORKFLOW.md`** (both root + `.claude/`) → Stage 1 **Spec Self-Review** (4 checks); Stage 7 became **MERGE/FINISH** with 4 structured options + **typed `discard` confirmation** (from `brainstorming` + `finishing-a-development-branch`).
+- **`.claude/CLAUDE.md`** → registered `/writing-skills` + `/writing-plans` in Skills→Process table.
+- **Skipped (unchanged decision):** brainstorm-every-project (conflicts SIMPLE/XS lane — took only spec self-review), git worktrees (non-git env). `#3 verification` + `#8 receiving-review` were already applied in wave 1 — verified, not duplicated.
+- **Known residual template drift (pre-existing, NOT from this wave):** `init-project`, `review`, `start` skills differ live↔template from earlier sessions — left as-is, flagged for a future sync.
+
 **Still open — Nik's decision:** physical file `Localisation-Agent/.claude/rules/core-rules.md`
 (the only one that exists; auto-loads for that project only) — delete or keep?
 Optional: register `/receiving-review` in the CLAUDE.md skills tables.

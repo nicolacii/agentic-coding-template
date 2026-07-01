@@ -8,6 +8,7 @@ description: Convert accumulated improvements from tasks/improvements.md into ac
 
 > Внедрение накопленных улучшений из backlog/рефлексий в правила проекта.
 > Запуск: `/backlog-to-rules` или "внедри улучшения", "обнови правила из backlog"
+> 📐 КАК формулировать правило — по **`/writing-skills`** («Match the Form to the Failure»): discipline-провал → prohibition + rationalization table + red flags; wrong-shape выход → positive recipe/contract; пропуск элемента → structural REQUIRED-поле; условное поведение → conditional. Не тяни к запрету по умолчанию.
 
 ---
 
