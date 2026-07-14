@@ -251,14 +251,15 @@ Reflection требует памяти всех этапов — не делег
 | developer-api (типовые) | **Sonnet** | Established patterns |
 | developer-ui (large) | **Sonnet** | Эмпирически 2-4× быстрее, 0 vs 4 errors |
 | developer-* (novel arch) | **Opus** | State design, новые паттерны |
-| reviewer-* | **Sonnet** | Rule checking |
+| reviewer-* (M/L/XL Workflow) | **Opus** (`REVIEW_MODEL='opus'`) | ⭐ 2026-07-13: адверсариальное ревью + confirm-pass; one-shot Sonnet-ревью пропускал латентные баги |
+| reviewer (XS/S inline, малый diff) | **Sonnet** | Достаточно для маленького diff; всё равно adversarial + confirm, может ESCALATE |
 | qa | **Sonnet** | Running checks |
 
 **Эмпирика task 10.0 Billing:**
 - Opus: 9 мин analyst, 3 ЧАСА developer-ui, 4× API 529 errors
 - Sonnet: 4-5 мин reviewer, 2.7 мин qa, 0× API 529 errors
 
-Default — Sonnet. Opus только когда нужна глубина рассуждений.
+Default — Sonnet. Opus — когда нужна глубина рассуждений **и для ревью M/L/XL Workflow** (цена пропущенного прод-бага высока).
 
 ---
 

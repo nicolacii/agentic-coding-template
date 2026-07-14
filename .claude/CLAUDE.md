@@ -136,7 +136,8 @@ Check:    [как поймём что готово]
 | developer-api / developer-* (типовые) | **Sonnet** | Established patterns, sufficient quality |
 | developer-ui (large new UI) | **Sonnet** | Эмпирически 2-4× быстрее Opus, 0 vs 4 API 529 errors |
 | developer-* (architectural / novel) | **Opus** | State design, новые паттерны |
-| reviewer-* | **Sonnet** | Rule checking, fast iteration |
+| reviewer-* (M/L/XL Workflow) | **Opus** (`REVIEW_MODEL='opus'`) | ⭐ 2026-07-13: адверсариальное ревью + confirm-pass — цена пропущенного прод-бага высокая; Sonnet-ревью one-shot пропускал латентные баги. Дефолт для КАЖДОЙ Workflow-задачи. |
+| reviewer (XS/S inline код, малый diff) | **Sonnet** | Достаточно для маленького diff; всё равно adversarial + confirm, может ESCALATE в Workflow |
 | qa | **Sonnet** | Running checks, no creative work |
 
 **Failure handling:** sub-agent падает с 529 второй раз → переключить на Sonnet для retry. Третий 529 → orchestrator fallback (см. `/orchestrate` Circuit Breaker).

@@ -226,26 +226,39 @@ Sequential потому что слои зависят друг от друга.
 
 ---
 
-## Этап 4: REVIEW
+## Этап 4: REVIEW (adversarial + confirm-pass)
 
 **Выход:** `tasks/{section}/review-{section}.md` ИЛИ `reviewer-*.md` файлы
 
+> ⭐ **Ревью — адверсариальное, не подтверждающее.** Полная спецификация процесса —
+> в `~/.claude/WORKFLOW.md` → Этап 4. Здесь — краткая версия для проектного pipeline.
+
+**Адверсариальное ревью (любая дорожка):**
+1. Трассируй **РЕАЛЬНЫЙ steady-state** (2-й запуск / пустые данные / рестарт / частичный отказ), не happy-path.
+2. Каждый finding = **`file:line` + `failureScenario` (вход→неверный выход) + `testGap` (докажи, что тесты это НЕ ловят)**.
+3. **Evidence gate:** ПОЛНЫЙ suite + typecheck + build ДО findings; нет доказательства → `UNVERIFIED`.
+4. **Adversarial clearing:** очистить категории риска с доказательством («CLEAN because <evidence>»).
+
+**Confirm-pass (обязателен):** после фикса **ТОТ ЖЕ ревьюер** перепроверяет фикс В КОРНЕ (не «тест позеленел»). `confirmStillBroken:true` → **мерж заблокирован**. Fixes — через `/receiving-review`.
+
+**Ревью-дефолт по дорожкам:**
+- **XS/S inline (код)** → 1 независимый adversarial ревьюер на `git diff` (Sonnet ок), оркестратор НЕ self-review-and-merge кода; ревьюер может **ESCALATE** в Workflow, если diff трогает рисковую поверхность (auth/tenant · creds/secrets · migrations · billing · security · egress/deploy · destructive ops).
+- **XS/S inline (trivial: docs/config/rename/test-only)** → solo, ревьюер не нужен.
+- **M/L/XL Workflow** → reviewer-субагент **на Opus** (`REVIEW_MODEL='opus'`) + confirm-pass + **независимое ревью оркестратора на полном diff перед мержем** (trace steady-state + verify tests + live-verify). One-shot sub-agent ревью НИКОГДА не достаточно.
+- **XL / critical** → дополнительно **персистентный reviewer-teammate** через `/orchestrate`.
+
 ### Auto-orchestration (для COMPLEX)
 
-Orchestrator АВТОМАТИЧЕСКИ spawn reviewers PARALLEL:
+Orchestrator spawn reviewers PARALLEL (на Opus):
 ```
 Task("reviewer-architect") + Task("reviewer-fe-senior")  # parallel
 + Task("reviewer-security")   # if backend project
 + Task("reviewer-backend")    # if backend project
 ```
 
-Если verdict = CHANGES REQUESTED → orchestrator spawn нужного developer для fix → re-review.
+Если verdict = CHANGES REQUESTED → spawn developer для fix → **confirm-pass тем же ревьюером** → повтор пока не clean → ревью оркестратора перед мержем.
 
-### Manual mode
-
-Проверить: архитектура, типы, тесты, accessibility, security.
-
-**Verdict:** APPROVED / CHANGES REQUESTED
+**Verdict (taxonomy):** APPROVED / APPROVE-WITH-NITS / CHANGES REQUESTED. **🚦 Merge-block:** нерешённый `critical`/`major` ИЛИ `confirmStillBroken:true` = мерж запрещён.
 
 ---
 
@@ -387,6 +400,8 @@ git checkout main && git pull
 5. **Нельзя мержить** без passed testing (этап 5)
 6. **Нельзя говорить "визуально совпадает"** без visual diff < 1%
 7. **"Давай дальше" НЕ отменяет pipeline**
+8. **Нельзя мержить КОД без независимого ревью** — оркестратор никогда не self-review-and-merge кода (этап 4). Trivial docs/config/rename/test-only — исключение.
+9. **Нельзя мержить** при нерешённом `critical`/`major` ИЛИ `confirmStillBroken:true` (этап 4 merge-block)
 
 ---
 
@@ -414,7 +429,12 @@ mv tasks/{old-section-1,old-section-2,...} tasks/archive/2026-Q1/
 0.GIT → 3.IMPLEMENT → 5.TEST → 7.MERGE
 ```
 
-Пропускаются: 1.TASK, 2.ANALYSIS, 4.REVIEW, 6.REFLECTION.
+Пропускаются: 1.TASK, 2.ANALYSIS, 6.REFLECTION.
+
+**⚠️ 4.REVIEW НЕ пропускается для КОДА (2026-07-13).** Меняешь реальный код → перед
+мержем обязателен **1 независимый adversarial ревьюер на `git diff`** (оркестратор не
+self-review-and-merge кода; ревьюер может ESCALATE в full workflow). Полностью solo —
+только **trivial**: docs / config / rename / test-only.
 
 **Условие:** задача < 30 строк изменений, нет нового функционала, нет архитектурных решений.
 

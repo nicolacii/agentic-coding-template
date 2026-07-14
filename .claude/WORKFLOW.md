@@ -24,11 +24,17 @@
 
 | Размер | Дорожка | Этапы | Субагенты |
 |--------|---------|-------|-----------|
-| **XS/S** | Inline (solo) | `0.GIT → 3.IMPLEMENT → 5.TEST → 7.MERGE` | **нет** (всё инлайн) |
-| **M** | **Full + субагенты** | все 7 этапов | **да** (single-track: 1 analyst → 1 developer → 1 reviewer) |
-| **L/XL** | Full + субагенты | все 7 этапов | да (parallel фан-аут: несколько analysts/developers/reviewers) |
+| **XS/S** | Inline (solo) | `0.GIT → 3.IMPLEMENT → 5.TEST → [4.REVIEW*] → 7.MERGE` | **нет** для кода — 1 независимый ревьюер на diff (Stage 4); trivial (docs/config/rename/test-only) — solo |
+| **M** | **Full + субагенты** | все 7 этапов | **да** (single-track: 1 analyst → 1 developer → 1 reviewer **на Opus + confirm**) |
+| **L/XL** | Full + субагенты | все 7 этапов | да (parallel фан-аут: несколько analysts/developers/reviewers **на Opus + confirm + слой оркестратора**) |
 
 **Ключевая граница: S/XS = инлайн (один агент). M и выше = полный workflow с субагентами.**
+
+> \* **Инлайн-код всё равно ревьюится (2026-07-13).** Даже XS/S код-change получает
+> **один независимый adversarial ревьюер на `git diff` перед мержем** — оркестратор
+> НИКОГДА не self-review-and-merge кода. Ревьюер может **ESCALATE** в Workflow, если
+> diff трогает рисковую поверхность. Trivial (docs/config/rename/test-only) — solo.
+> Детали и merge-block — в **Этап 4** ниже.
 
 ### 🟡 M-lane — полный workflow, single-track оркестрация
 
@@ -265,30 +271,79 @@ Sequential потому что слои зависят друг от друга.
 
 ---
 
-## Этап 4: REVIEW
+## Этап 4: REVIEW (adversarial + confirm-pass)
 
 **Выход:** `tasks/{section}/review-{section}.md` ИЛИ `reviewer-*.md` файлы
 
-### Auto-orchestration (для COMPLEX)
+> ⭐ **Ревью — адверсариальное, не подтверждающее.** Цель ревьюера — найти
+> **воспроизводимый прод-баг**, а не поставить APPROVED. Урок из реального кейса:
+> one-shot sub-agent ревью подтвердил код с латентным багом (флаг, который всегда
+> `true`) — поймал только независимый второй слой ревью. Отсюда правила ниже.
 
-Orchestrator АВТОМАТИЧЕСКИ spawn reviewers PARALLEL:
+### Что значит «адверсариальное ревью» (для ЛЮБОЙ дорожки)
+
+1. **Трассируй РЕАЛЬНЫЙ steady-state, не happy-path.** Как код ведёт себя на
+   второй запуск / пустые данные / после рестарта / при частичном отказе — а не
+   только на чистом первом прогоне.
+2. **Каждый finding = `file:line` + `failureScenario` + `testGap`:**
+   - `failureScenario` — конкретный вход/состояние → неверный выход или краш.
+   - `testGap` — **докажи, что существующие тесты этого НЕ ловят** (назови тест,
+     который «зелёный», но пропускает баг). Finding без доказанного testGap — слабый.
+3. **Evidence gate (ДО findings):** прогнать ПОЛНЫЙ suite (не только новые тесты) +
+   typecheck + build; прочитать реально изменённые файлы (`file:line`); на каждое
+   утверждение — процитировать тест-доказательство. Нет доказательства → **UNVERIFIED**.
+4. **Adversarial clearing:** явно ПРОВЕРИТЬ и ОЧИСТИТЬ категории риска с доказательством
+   (`injection · XSS · authz/scope · secrets-never-leak · partial-failure/idempotency ·
+   pagination/N+1`). «CLEAN because <evidence>» — требуемый вывод, не пропуск.
+
+### Confirm-pass (обязателен после каждого фикса)
+
+Ревью — это не «нашёл → закрыл». После того как разработчик починил finding,
+**ТОТ ЖЕ ревьюер повторно проверяет фикс В КОРНЕ** — не «тест позеленел», а что
+причина устранена и `failureScenario` больше не воспроизводится:
+- `confirmStillBroken: true` → **мерж заблокирован**, фикс возвращается на доработку.
+- Fixes выполняются через skill **`/receiving-review`** (verify claim → fix at root → жди confirm).
+
+### Verdict (taxonomy)
+
+- **APPROVED** — нет findings выше `minor`.
+- **APPROVE-WITH-NITS** — функц. ок, тесты зелёные, только `minor`/by-design ниты (мерж разрешён, ниты перечислить).
+- **CHANGES REQUESTED / BLOCK** — ≥1 `critical`/`major`, падающий/отсутствующий тест, или `confirmStillBroken`.
+
+**🚦 Merge-block (non-negotiable):** любой нерешённый `critical`/`major` ИЛИ `confirmStillBroken:true` = **мерж запрещён**. Verdict первой строкой, evidence ниже.
+
+### Ревью-дефолт по дорожкам (non-negotiable)
+
+| Дорожка | Ревьюер | Модель | Confirm | Доп. слой перед мержем |
+|---------|---------|--------|---------|------------------------|
+| **XS/S inline — код** | 1 независимый adversarial ревьюер на `git diff` (Agent tool) | Sonnet (малый diff) | да | оркестратор **НИКОГДА** не self-review-and-merge кода |
+| **XS/S inline — trivial** (docs / config / rename / test-only) | не нужен (solo) | — | — | — |
+| **M/L/XL Workflow** | reviewer-субагент (Stage 4) | **Opus** (`REVIEW_MODEL='opus'`) | да, обязателен | **независимое adversarial ревью оркестратора** на полном diff (trace steady-state + verify tests cover edge + live-verify) |
+| **XL / critical** | то же + **персистентный reviewer-teammate** через `/orchestrate` (live reviewer↔dev, resume по SendMessage) | Opus | да | + оркестраторский слой выше |
+
+- **One-shot sub-agent ревью НИКОГДА не достаточно для Workflow-задачи** — обязателен второй, независимый слой: оркестратор читает ВЕСЬ diff, трассирует steady-state, проверяет что тесты покрывают edge, и **live-verify**.
+- **Инлайн код-change: оркестратор НЕ ревьюит-и-мержит сам.** Ровно ОДИН независимый adversarial ревьюер на реальном diff перед мержем — та же дисциплина (`file:line` + `failureScenario` + `testGap`, «докажи что тесты не ловят»).
+- **ESCALATE:** ревьюер оценивает риск на РЕАЛЬНОМ diff (upfront-догадка о риске ненадёжна) и может флагнуть «это должно было идти через Workflow», если diff трогает рисковую поверхность (**auth/tenant · creds/secrets · migrations/data-model · billing · security · two-store / reconciliation · egress/deploy · destructive ops**) И нетривиален → тогда переделать через полный workflow.
+- **Trivial (docs / config / rename / test-only) остаётся solo** — ревьюер не нужен.
+
+### Auto-orchestration (M/L/XL)
+
+Orchestrator spawn reviewers PARALLEL (на **Opus**, `REVIEW_MODEL='opus'`):
 ```
 Task("reviewer-architect") + Task("reviewer-fe-senior")  # parallel
 + Task("reviewer-security")   # if backend project
 + Task("reviewer-backend")    # if backend project
 ```
 
-Если verdict = CHANGES REQUESTED → orchestrator spawn нужного developer для fix → re-review.
+Если verdict = CHANGES REQUESTED → orchestrator spawn нужного developer для fix →
+**confirm-pass ТЕМ ЖЕ ревьюером** → повтор пока не clean → **независимое ревью
+оркестратора на полном diff перед мержем**.
 
 ### Manual mode
 
-Использовать skill **`/review`** + шаблон **`~/.claude/templates/review-template.md`** (evidence-based / adversarial). Ревью ≠ «прогнал линтер → APPROVED»:
-
-1. **Evidence gate (ДО findings):** прогнать ПОЛНЫЙ тест-suite (не только новые) + typecheck + build; прочитать реально изменённые файлы (file:line); на каждое утверждение — процитировать тест-доказательство. Нет доказательства → **UNVERIFIED**.
-2. **Findings по severity** (critical/important/minor), каждый: **file:line · consequence (вход→неверный выход) · fix · risk.** `medium`-correctness-gap (не краш) всё равно репортится.
-3. **Adversarial clearing (ОБЯЗАТЕЛЬНО):** явно ПРОВЕРИТЬ и ОЧИСТИТЬ категории риска с доказательством (`injection · XSS · authz/scope · secrets-never-leak · partial-failure/idempotency · pagination/N+1`). «CLEAN because <evidence>» — требуемый вывод, не пропуск.
-
-**Verdict (taxonomy):** **APPROVED** / **APPROVE-WITH-NITS** (функц. ок, тесты зелёные, только minor/by-design ниты → мерж разрешён) / **CHANGES REQUESTED** (≥1 critical/important или падающий/отсутствующий тест). Verdict первой строкой, evidence ниже.
+Использовать skill **`/review`** + шаблон **`~/.claude/templates/review-template.md`**:
+пройти адверсариальные шаги 1–4 выше, каждый finding с `failureScenario`+`testGap`,
+confirm-pass после фикса, verdict-taxonomy. Ревью ≠ «прогнал линтер → APPROVED».
 
 ---
 
@@ -430,6 +485,8 @@ git checkout main && git pull
 5. **Нельзя мержить** без passed testing (этап 5)
 6. **Нельзя говорить "визуально совпадает"** без visual diff < 1%
 7. **"Давай дальше" НЕ отменяет pipeline**
+8. **Нельзя мержить КОД без независимого ревью** — оркестратор никогда не self-review-and-merge кода; инлайн-код → 1 независимый ревьюер на diff, Workflow → reviewer+confirm+слой оркестратора (этап 4). Trivial docs/config/rename/test-only — исключение.
+9. **Нельзя мержить** при нерешённом `critical`/`major` finding ИЛИ `confirmStillBroken:true` (этап 4 merge-block)
 
 ---
 
@@ -457,7 +514,13 @@ mv tasks/{old-section-1,old-section-2,...} tasks/archive/2026-Q1/
 0.GIT → 3.IMPLEMENT → 5.TEST → 7.MERGE
 ```
 
-Пропускаются: 1.TASK, 2.ANALYSIS, 4.REVIEW, 6.REFLECTION.
+Пропускаются: 1.TASK, 2.ANALYSIS, 6.REFLECTION.
+
+**⚠️ 4.REVIEW НЕ пропускается для КОДА (2026-07-13).** Если lightweight-задача меняет
+реальный код — перед мержем обязателен **один независимый adversarial ревьюер на `git diff`**
+(оркестратор не self-review-and-merge кода; ревьюер может ESCALATE в full workflow —
+см. Этап 4 → «Ревью-дефолт по дорожкам»). Полностью solo (без ревьюера) — только
+**trivial**: docs / config / rename / test-only.
 
 **Условие:** задача < 30 строк изменений, нет нового функционала, нет архитектурных решений.
 

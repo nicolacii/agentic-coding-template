@@ -1,35 +1,43 @@
 # Code Review: {Section}
 
-> Дата: YYYY-MM-DD
+> Дата: YYYY-MM-DD · Ревьюер: {agent/model} · Дорожка: XS/S-inline | M | L/XL
+> **Verdict (первой строкой):** APPROVED / APPROVE-WITH-NITS / CHANGES REQUESTED
 
 ---
 
-## Architecture Review
-- Architecture: PASS/FAIL
-- API Types: PASS/FAIL
-- Store: PASS/FAIL
-- Security: PASS/FAIL
+## Evidence gate (ДО findings)
 
-### Issues (must fix):
-1. [issue]
-
-### Suggestions:
-1. [suggestion]
+- [ ] Прогнан ПОЛНЫЙ suite (не только новые): `N passed, M skipped`
+- [ ] Typecheck: 0 errors · Build: success
+- [ ] Реально изменённые файлы прочитаны (`file:line`), не только summary разработчика
+- [ ] На каждый finding есть тест-доказательство (или помечен `UNVERIFIED`)
 
 ---
 
-## Code Quality Review
-- Components: PASS/FAIL
-- Tests: PASS/FAIL
-- Styles: PASS/FAIL
-- Accessibility: PASS/FAIL
-- i18n: PASS/FAIL
+## Findings (по severity)
 
-### Issues (must fix):
-1. [issue]
+> Каждый finding обязан иметь **`failureScenario`** и **`testGap`**. Без доказанного
+> testGap finding — слабый (`UNVERIFIED`). Трассируй РЕАЛЬНЫЙ steady-state, не happy-path.
 
-### Suggestions:
-1. [suggestion]
+### 🔴 Critical / 🟡 Major / 🟢 Minor: {название}
+- **file:line:** `path:NN`
+- **failureScenario:** конкретный вход/состояние → неверный выход/краш (шаги воспроизведения)
+- **testGap:** какой «зелёный» тест это пропускает и почему
+- **fix:** как чинить (root cause, не симптом)
+- **confirmStillBroken:** true/false (заполняется на confirm-pass после фикса)
+
+---
+
+## Adversarial clearing (обязательно — «CLEAN because <evidence>», не пропуск)
+
+| Категория | Verdict | Доказательство |
+|-----------|---------|----------------|
+| Injection (SQL/command) | CLEAN / ISSUE | |
+| XSS / output encoding | CLEAN / ISSUE / N-A | |
+| AuthZ / access control / tenant-scope | CLEAN / ISSUE | |
+| Secrets never leak | CLEAN / ISSUE | |
+| Partial-failure / idempotency (2-й запуск) | CORRECT / BROKEN | |
+| Pagination / N+1 | CORRECT / ISSUE | |
 
 ---
 
@@ -41,4 +49,17 @@
 
 ---
 
-## Verdict: APPROVED / CHANGES REQUESTED
+## Confirm-pass (после фикса, ТОТ ЖЕ ревьюер)
+
+- [ ] Причина устранена в КОРНЕ (не «тест позеленел»)
+- [ ] `failureScenario` больше не воспроизводится
+- [ ] `confirmStillBroken: false` по всем critical/major
+
+---
+
+## Verdict: APPROVED / APPROVE-WITH-NITS / CHANGES REQUESTED
+
+**🚦 Merge-block:** любой нерешённый `critical`/`major` ИЛИ `confirmStillBroken:true` = мерж запрещён.
+
+- APPROVE-WITH-NITS → перечислить оставшиеся minor/by-design ниты (мерж разрешён).
+- CHANGES REQUESTED → fixes через `/receiving-review` → confirm-pass → повтор.
